@@ -1,3 +1,19 @@
+GuideDeck 0.4.1 branding validation — 2026-10-30
+
+Confirmed successful Windows CI:
+  Run: 41077862542
+  Commit: 0256e3168bdf3e78fe939a9f36fe210e0bffb751
+  https://github.com/shenlee377/xbox-buttom-changer/actions/runs/41077862542
+  PASS 84 core regressions, desktop and single-file startup / activation
+  PASS WPF publish and UWP unsigned MSIX packaging with new icon resources
+  PASS standard/compact light/dark renders; header icon visually inspected
+  PASS live theme updates and installer checksum/install/update/uninstall
+Local asset inspection: eight ICO sizes (16 through 256), 1024 master PNG,
+Game Bar PNG dimensions, RGBA encoding and transparent outer corners.
+SVG is the editable production source. No new input-handling behavior.
+Actual Game Bar host execution / Windows shell cache refresh remains untested.
+Prior Steam/controller effectiveness limits below remain applicable.
+
 GuideDeck 0.4 validation — 2026-10-30
 
 Confirmed successful Windows CI:
