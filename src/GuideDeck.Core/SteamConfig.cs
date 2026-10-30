@@ -15,6 +15,40 @@ public static class SteamConfig
     private sealed record Token(char Kind, string Value, int Offset, int Length);
     private sealed record Leaf(string[] Path, Token Value);
 
+    // Steam's Guide focus/chord switches are separate from SDL_GamepadBind.
+    // Only observed, existing Boolean leaves in the client configuration stores
+    // are writable. Missing keys never imply false and are never guessed/inserted.
+    internal static IReadOnlyList<GuideSetting> InspectGuideSettings(byte[] bytes)
+    {
+        if (bytes.Length > MaxBytes) throw new FormatException("設定檔超過 8 MiB。");
+        var start = bytes.AsSpan().StartsWith(new byte[] {239, 187, 191}) ? 3 : 0;
+        _ = new UTF8Encoding(false, true).GetString(bytes, start, bytes.Length - start);
+        var tokens = Tokenize(Encoding.Latin1.GetString(bytes), start);
+        var leaves = new List<Leaf>(); var objects = new List<string[]>(); int cursor = 0;
+        Parse(tokens, ref cursor, [], leaves, objects, false);
+        var roots = objects.Where(p => p.Length == 1).ToArray();
+        if (roots.Length != 1 || !(roots[0][0].Equals("UserLocalConfigStore", StringComparison.OrdinalIgnoreCase) ||
+            roots[0][0].Equals("InstallConfigStore", StringComparison.OrdinalIgnoreCase)))
+            throw new FormatException("找不到唯一的 Steam 本機設定根節點，請使用 Steam 原生設定。");
+        var result = new List<GuideSetting>();
+        foreach (var key in SteamGuideSettings.Keys)
+        {
+            var matches = leaves.Where(l => l.Path.Last().Equals(key, StringComparison.OrdinalIgnoreCase)).ToArray();
+            var collisions = objects.Where(p => p.Last().Equals(key, StringComparison.OrdinalIgnoreCase)).ToArray();
+            if (matches.Length > 1 || collisions.Length > 0) throw new FormatException("Guide 設定重複或格式衝突：" + key);
+            if (matches.Length == 0) { result.Add(new(key, null, null, -1, 0)); continue; }
+            var leaf = matches[0];
+            bool allowed = leaf.Path.Length == 2 || (leaf.Path.Length == 5 &&
+                leaf.Path.Skip(1).Take(3).SequenceEqual(new[] {"Software", "Valve", "Steam"}, StringComparer.OrdinalIgnoreCase));
+            if (!allowed || Enumerable.Range(1, leaf.Path.Length - 1).Any(depth =>
+                objects.Count(p => p.SequenceEqual(leaf.Path[..depth], StringComparer.OrdinalIgnoreCase)) != 1))
+                throw new FormatException("Guide 設定位於未知或重複路徑，請使用 Steam 原生設定：" + key);
+            if (leaf.Value.Value is not ("0" or "1")) throw new FormatException("Guide 設定不是已知的 0／1 格式：" + key);
+            result.Add(new(key, string.Join("/", leaf.Path), leaf.Value.Value, leaf.Value.Offset, leaf.Value.Length));
+        }
+        return result;
+    }
+
     public static ConfigInspection Inspect(byte[] bytes)
     {
         if (bytes.Length > MaxBytes) throw new FormatException("設定檔超過 8 MiB，停止處理。");

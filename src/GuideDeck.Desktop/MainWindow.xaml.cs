@@ -54,9 +54,10 @@ public partial class MainWindow : Window
                 if (File.Exists(preferences.ConfigPath)) { ConfigPath.Text = preferences.ConfigPath; Inspect(); }
                 ReloadHistory();
             });
+            DetectGuideSteam(null, null);
             monitor.Start();
         };
-        monitor.Tick += async (_, _) => await MonitorAsync();
+        monitor.Tick += async (_, _) => { await MonitorAsync(); await MonitorGuideSettingsAsync(); };
         Closed += (_, _) => { closed = true; monitor.Stop(); themes.Changed -= UpdateAppearance; };
         ContentRendered += async (_, _) => {
             var directory = ((App)Application.Current).CaptureDirectory;
@@ -93,7 +94,7 @@ public partial class MainWindow : Window
         busy = true; MainTabs.IsEnabled = false;
         try { await action(); }
         catch (Exception e) { Status.Text = "未完成：" + e.Message; }
-        finally { busy = false; MainTabs.IsEnabled = true; UpdateApply(); }
+        finally { busy = false; MainTabs.IsEnabled = true; UpdateApply(); UpdateGuideApply(); }
     }
     private void ClearPreview()
     {

@@ -116,7 +116,7 @@ public static class ConfigTransaction
         ReplaceIfUnchanged(path, current, restored, guard);
     }
 
-    private static FileStream Lock(string path) => new(path + ".guidedeck.lock", FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+    internal static FileStream Lock(string path) => new(path + ".guidedeck.lock", FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
     private static string ValidatePath(string path)
     {
         path = Path.GetFullPath(path);
@@ -132,7 +132,7 @@ public static class ConfigTransaction
         file.ReadExactly(data);
         return data;
     }
-    private static void ReplaceIfUnchanged(string path, byte[] expected, byte[] replacement, Action guard)
+    internal static void ReplaceIfUnchanged(string path, byte[] expected, byte[] replacement, Action guard)
     {
         var temp = path + ".guidedeck-" + Guid.NewGuid().ToString("N") + ".tmp";
         try

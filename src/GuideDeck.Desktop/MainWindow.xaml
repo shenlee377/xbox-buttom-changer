@@ -2,11 +2,45 @@
  <Grid Margin="24" Background="{DynamicResource AppBackgroundBrush}">
   <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
   <Grid Margin="2,0,0,22"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="190"/></Grid.ColumnDefinitions>
-   <StackPanel><WrapPanel><TextBlock Text="GuideDeck" FontSize="28" FontWeight="SemiBold"/><Border Background="{DynamicResource AccentSoftBrush}" CornerRadius="4" Padding="8,4" Margin="12,4,0,0" VerticalAlignment="Center"><TextBlock Text="實驗版 0.3" Foreground="{DynamicResource AccentSoftTextBrush}" FontSize="11" FontWeight="SemiBold"/></Border></WrapPanel><TextBlock Text="把 Xbox 按鈕留給您選擇的介面" Foreground="{DynamicResource MutedTextBrush}" Margin="0,5,0,0"/></StackPanel>
+   <StackPanel><WrapPanel><TextBlock Text="GuideDeck" FontSize="28" FontWeight="SemiBold"/><Border Background="{DynamicResource AccentSoftBrush}" CornerRadius="4" Padding="8,4" Margin="12,4,0,0" VerticalAlignment="Center"><TextBlock Text="實驗版 0.4" Foreground="{DynamicResource AccentSoftTextBrush}" FontSize="11" FontWeight="SemiBold"/></Border></WrapPanel><TextBlock Text="把 Xbox 按鈕留給您選擇的介面" Foreground="{DynamicResource MutedTextBrush}" Margin="0,5,0,0"/></StackPanel>
    <StackPanel Grid.Column="1"><ComboBox x:Name="AppearanceChoice" AutomationProperties.Name="外觀模式" AutomationProperties.AutomationId="AppearanceChoice" SelectionChanged="AppearanceChanged"><ComboBoxItem Content="跟隨系統"/><ComboBoxItem Content="淺色"/><ComboBoxItem Content="深色"/></ComboBox><TextBlock x:Name="ThemeStatus" Foreground="{DynamicResource MutedTextBrush}" FontSize="11" Margin="2,6,0,0"/></StackPanel>
   </Grid>
   <TabControl x:Name="MainTabs" Grid.Row="1" TabStripPlacement="Left">
-   <TabItem Header="Steam 設定"><Grid>
+   <TabItem Header="Steam Guide"><Grid>
+    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+    <StackPanel><TextBlock Text="阻止 Guide 開啟 Steam 大螢幕" Style="{StaticResource PageTitle}"/><TextBlock Text="先處理 Steam 自己的 Guide 開關；不需要先修改控制器 mapping。" Style="{StaticResource Subtitle}"/></StackPanel>
+    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,8,0"><StackPanel>
+     <Border Background="{DynamicResource NoticeBrush}" CornerRadius="8" Padding="14" Margin="0,0,0,16"><TextBlock Text="舊版只移除 SDL Guide 欄位，無法涵蓋 Steam 的大螢幕啟動路徑。此頁改為管理 Steam 的聚焦與 Guide 組合鍵設定。" Foreground="{DynamicResource NoticeTextBrush}" FontSize="12"/></Border>
+     <Border Style="{StaticResource Card}"><StackPanel>
+      <TextBlock Text="01　先關閉 Steam 的兩個 Guide 選項" Style="{StaticResource SectionTitle}"/>
+      <TextBlock Text="到 Steam → 設定 → 控制器（部分版本在進階設定），關閉：&#10;• 導覽鍵將使 Steam 視窗顯示在前（Guide button focuses Steam）&#10;• 為控制器啟用導覽鍵組合鍵（Enable Guide Button Chords for controllers）"/>
+      <Button Content="開啟 Steam 控制器設定" Click="OpenSteamControllerSettings" HorizontalAlignment="Left" Margin="0,12,0,0"/>
+      <TextBlock Text="停用組合鍵也會停用 Steam 的 Guide 快捷操作；普通按鍵、Steam Input 與 Shift+Tab 的開關不會被 GuideDeck 修改。若連結未直達，請從 Steam 選單進入。" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" Margin="0,12,0,0"/>
+     </StackPanel></Border>
+     <Border Style="{StaticResource Card}"><StackPanel>
+      <TextBlock Text="02　檢查儲存值，或預覽直接修正" Style="{StaticResource SectionTitle}"/>
+      <WrapPanel><Button Content="偵測 Steam 設定" Click="DetectGuideSteam"/><Button Content="選擇設定檔…" Click="ChooseGuideFile"/><Button Content="重新檢查" Click="InspectGuideClick"/></WrapPanel>
+      <TextBlock Text="設定來源（多帳號請選目前使用的帳號）" Style="{StaticResource FieldLabel}"/>
+      <ComboBox x:Name="GuideSources" DisplayMemberPath="DisplayName" SelectionChanged="GuideSourceChanged" AutomationProperties.Name="Steam Guide 設定來源"/>
+      <TextBox x:Name="GuideConfigPath" TextChanged="GuidePathChanged" AutomationProperties.Name="Steam Guide 設定檔路徑" FontSize="12" Margin="0,8,0,0"/>
+      <TextBlock x:Name="GuideSwitches" Text="尚未檢查。帳號設定與安裝設定可能分開儲存；每次只修改這個檔案。" Margin="0,14,0,0"/>
+      <TextBlock Text="預覽變更" Style="{StaticResource FieldLabel}"/>
+      <TextBlock x:Name="GuideChanges" Text="尚未建立預覽。" FontFamily="Consolas, Microsoft JhengHei UI" FontSize="12"/>
+      <TextBlock x:Name="GuideFeedback" Text="只修改已存在且格式明確的開關；找不到欄位代表未知，不會猜測新增。" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" Margin="0,12,0,0"/>
+     </StackPanel></Border>
+     <Border Style="{StaticResource Card}"><StackPanel>
+      <TextBlock Text="03　重啟 Steam 後測試" Style="{StaticResource SectionTitle}"/>
+      <TextBlock Text="分別測試 Steam 在背景、Steam 視窗在前景，以及遊戲進行中。按一下／連按／長按 Xbox 鈕，確認不進入大螢幕、不聚焦 Steam，且 Game Bar、Shift+Tab 與普通手把操作正常。"/>
+      <TextBlock Text="若仍會觸發，請保留失敗觀察並重新檢查設定是否被寫回；不要反覆套用 mapping、鎖死設定檔或關閉整個 Steam Input。此頁不安裝攔截驅動。" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" Margin="0,12,0,0"/>
+     </StackPanel></Border>
+    </StackPanel></ScrollViewer>
+    <Border Grid.Row="2" Style="{StaticResource Card}" Padding="16" Margin="0,12,8,0"><StackPanel>
+     <CheckBox x:Name="GuideConsent" Margin="0,0,0,10" Checked="GuideConsentChanged" Unchecked="GuideConsentChanged"><TextBlock Text="我了解 Steam Guide 組合鍵也可能停用；套用前會完整離開 Steam。" FontSize="12"/></CheckBox>
+     <WrapPanel><Button x:Name="GuideApply" Content="備份並關閉列出的開關" IsEnabled="False" Style="{StaticResource PrimaryButton}" Click="ApplyGuideSettings"/><Button Content="還原 Guide 開關…" Click="RestoreGuideSettings"/></WrapPanel>
+     <TextBlock Text="設定寫入成功不等於已攔截成功。Steam 更新、切換帳號後請重新檢查。" Foreground="{DynamicResource MutedTextBrush}" FontSize="11" Margin="0,5,0,0"/>
+    </StackPanel></Border>
+   </Grid></TabItem>
+   <TabItem Header="進階 mapping"><Grid>
     <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
     <StackPanel><TextBlock Text="管理 Steam 的 Xbox 按鈕" Style="{StaticResource PageTitle}"/><TextBlock Text="檢查控制器設定、預覽修改，再測試遊戲中的實際效果。" Style="{StaticResource Subtitle}"/></StackPanel>
     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,8,0"><StackPanel>

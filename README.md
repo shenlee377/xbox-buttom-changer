@@ -4,10 +4,25 @@
 
 [建置狀態](https://github.com/shenlee377/xbox-buttom-changer/actions) · [下載版本](https://github.com/shenlee377/xbox-buttom-changer/releases) · [完整操作與驗收](README.txt)
 
-目前是 **0.3 實驗版**：以可還原的 SDL mapping 適配器驗證需求，尚未實作全系統輸入攔截。移除 `guide:bN` 不保證 Steam 的每條輸入路徑都被阻止，實際效果需要在 Windows、Steam 與實體手把上驗收。
+目前是 **0.4 實驗版**：針對「按 Guide 仍進 Steam 大螢幕」改用 Steam 自己的聚焦與導覽鍵組合鍵開關。舊版僅移除 SDL mapping 並不夠；此版仍沒有全系統輸入攔截驅動，效果需實機驗收。
+
+**按 Guide 仍開啟 Steam 大螢幕：先做這件事**
+
+在新首頁 **Steam Guide** 開啟 Steam 控制器設定，關閉這兩個選項（部分版本放在進階設定）：
+
+- **導覽鍵將使 Steam 視窗顯示在前 / Guide button focuses Steam**。
+- **為控制器啟用導覽鍵組合鍵 / Enable Guide Button Chords for controllers**。
+
+Valve 的 [2025-09-09 更新](https://steamcommunity.com/games/593110/announcements/detail/500583527919651040?l=english)指出，停用 Guide 組合鍵後，Guide 不再開啟大螢幕。這也會停用 Steam 的 Guide 快捷操作；GuideDeck 不改動整體 Steam Input、Overlay 或 Game Bar 開關。
+
+完整離開 Steam 後，可在 app 選取目前帳號的 `localconfig.vdf` 或安裝目錄 `config.vdf`，檢查已存值並預覽直接關閉已知開關。只修改已存在且格式明確的 0/1 欄位，提供局部備份／還原；缺少欄位標示未知，請使用 Steam 原生設定，不猜測新增。切換帳號或 Steam 寫回設定後需重新檢查。
+
+重啟 Steam，在背景、Steam 前景與遊戲中分別測試單按／連按／長按 Xbox 鈕。設定已寫入不等於行為已驗證；[研究依據與範圍](docs/STEAM-GUIDE-RESEARCH.txt)。
 
 **這版可以做什麼**
 
+- Steam Guide 專頁管理兩個原生 Guide 開關，不再以 mapping 當成主要修正。
+- 多帳號來源選擇、局部備份／還原、重新讀回與設定漂移提醒。
 - 左側導覽與分步卡片、固定主要操作，以及系統／淺色／深色外觀。
 - 即時跟隨 Windows 主題；高對比優先，同套件 widget 與桌面版共用偏好。
 - [介面設計與外觀規則](docs/UI-DESIGN.txt)。
@@ -20,7 +35,7 @@
 
 **實際介面預覽**
 
-以下圖片來自已通過驗證的 Windows WPF 程式渲染，並非概念稿。
+以下是 0.3 已驗證的主題預覽；0.4 首頁已改為 Steam Guide 設定流程，最新圖片見 CI 的 GuideDeck-ui-previews artifact。
 
 | 淺色 | 深色 |
 | --- | --- |
@@ -30,17 +45,17 @@
 
 從 [Releases](https://github.com/shenlee377/xbox-buttom-changer/releases) 下載 `GuideDeck-windows-x64.zip`，解壓縮後執行 `GuideDeck.exe`。不需要另外安裝 .NET runtime。
 
-也提供[單檔免安裝 EXE](https://github.com/shenlee377/xbox-buttom-changer/releases/download/v0.3.0/GuideDeck.exe)；[ZIP](https://github.com/shenlee377/xbox-buttom-changer/releases/download/v0.3.0/GuideDeck-windows-x64.zip) 較小。兩者都是桌面版，並非 Game Bar widget 的自動安裝程式。
+也提供[單檔免安裝 EXE](https://github.com/shenlee377/xbox-buttom-changer/releases/download/v0.4.0/GuideDeck.exe)；[ZIP](https://github.com/shenlee377/xbox-buttom-changer/releases/download/v0.4.0/GuideDeck-windows-x64.zip) 較小。兩者都是桌面版，並非 Game Bar widget 的自動安裝程式。
 
 也可下載並檢視 `Install-GuideDeck.ps1` 後執行：
 
 ```powershell
-.\Install-GuideDeck.ps1 -Version v0.3.0
+.\Install-GuideDeck.ps1 -Version v0.4.0
 ```
 
 腳本下載對應版本、核對 SHA-256、安裝到 `%LOCALAPPDATA%\Programs\GuideDeck`，並建立開始功能表捷徑，不需要管理員權限。移除腳本保留備份／觀察與 Steam 設定。這是未簽章的開發版；若政策不允許執行腳本，可使用免安裝 ZIP，腳本不修改 Windows 安全設定。
 
-[下載安裝腳本](https://github.com/shenlee377/xbox-buttom-changer/releases/download/v0.3.0/Install-GuideDeck.ps1) · [校驗檔](https://github.com/shenlee377/xbox-buttom-changer/releases/download/v0.3.0/SHA256SUMS.txt)
+[下載安裝腳本](https://github.com/shenlee377/xbox-buttom-changer/releases/download/v0.4.0/Install-GuideDeck.ps1) · [校驗檔](https://github.com/shenlee377/xbox-buttom-changer/releases/download/v0.4.0/SHA256SUMS.txt)
 
 Game Bar 需要額外的 UWP 開發套件建置與部署；桌面 ZIP 不會自動安裝 widget。開啟桌面管理器可能切出遊戲。詳細步驟見 [README.txt](README.txt)。
 

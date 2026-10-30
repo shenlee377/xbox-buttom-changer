@@ -1,0 +1,49 @@
+Steam Guide / Big Picture 修正研究 — 2026-10-30
+
+結論與實作：
+0.3 的 SDL guide:bN 移除沒有涵蓋使用者實際遇到的 Big Picture 路徑。
+0.4 改為先處理 Steam 原生「Guide button focuses Steam」與
+「Enable Guide Button Chords for controllers」。停用後者也會停用
+Steam Guide 組合快捷操作，不是關閉整個 Steam Input 或 Overlay。
+
+一手依據：
+Valve 2025-09-09 Steam Client Update（Steam Input 段落）：
+https://steamcommunity.com/games/593110/announcements/detail/500583527919651040?l=english
+Valve 說明停用 Guide chording 後不再由 Guide 開啟 Big Picture。
+同一份公告也提到 Guide 可切換桌面 Overlay，因此測試必須涵蓋遊戲。
+可由官方新聞 API 讀取該公告全文：
+https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid=593110&count=5&enddate=1757635200&maxlength=0
+
+Valve 官方 Big Picture 支援說明亦確認在 Steam 客戶端使用 home 鈕可進入此模式：
+https://help.steampowered.com/en/faqs/view/3725-76D3-3F31-FB63
+
+實際檢查官方 Windows 客戶端套件（唯讀，沒有修改／執行其 DLL）：
+https://client-update.akamai.steamstatic.com/steam_client_win32
+本次取得 manifest version 1769731672，並非宣稱所有分支的最新版本。
+steamui_websrc_all.zip.399ab78a41fd3867bf178d8bcee57db47a9de0bd
+SHA256 d76eabdb2eb9ceb3dd2a264ad232bdd667bdcb6d18253903ff6edbbe2f8b1f55
+bins_win32.zip.23e34a6d4b10596a44561a5100dac5585d2517da
+SHA256 8b712b2a3412a9066b7725f4e1c5cef9a7ca5b187b6585a5b92d25d09df0ba62
+
+Web UI 的兩個獨立布林設定：
+  controller_guide_button_focus_steam
+  controller_enable_chord
+SteamUI.dll 的設定描述對應至：
+  Controller_CheckGuideButton
+  SteamController_Enable_Chord
+steamclient64.dll 亦讀取後者，預設值為 true。
+這些是客戶端實作證據，不是 Valve 承諾穩定的公開寫入 API。
+沒有在本倉庫分發 Valve 的程式碼或 DLL。
+
+因此自動修改採保守範圍：
+- 只對使用者選取的一份 config.vdf / localconfig.vdf 操作。
+- 唯一 InstallConfigStore / UserLocalConfigStore 根節點；既有 0/1 欄位
+  必須位於根下或 Software/Valve/Steam 下。重複或未知格式拒絕修改。
+- 缺少欄位是未知，不能推論為 false，也不猜測新增路徑或預設值。
+  使用者可在 Steam 原生 UI 設定後，完整離開 Steam，再讀回檢查。
+- 只備份實際變更的開關、路徑與 hash，不保存整份使用者設定。
+- 已儲存 false 不代表實際輸入已阻止；不安裝驅動、不注入程序，
+  不設唯讀、不反覆強寫、不關閉或縮小 Steam 視窗假裝完成攔截。
+- Steam 更新、帳號、遠端串流、重複／虛擬控制器仍可能改變路徑，
+  需要背景／前景／遊戲與單按／連按／長按驗收。
+- 無 Windows + Steam + 實體手把環境，不能聲稱這次已實機重現或根治。

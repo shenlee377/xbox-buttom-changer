@@ -168,5 +168,111 @@ Test("manual light overrides dark system", () => Check(ThemePolicy.Resolve(Theme
 Test("manual dark overrides light system", () => Check(ThemePolicy.Resolve(ThemeMode.Dark, true, false) == ThemeVariant.Dark));
 Test("high contrast overrides every appearance preference", () => { foreach (var mode in Enum.GetValues<ThemeMode>()) Check(ThemePolicy.Resolve(mode, true, true) == ThemeVariant.HighContrast); });
 Test("unknown stored theme normalizes to system", () => Check(ThemePolicy.Normalize((ThemeMode)99) == ThemeMode.System && ThemePolicy.Resolve((ThemeMode)99, false, false) == ThemeVariant.Dark));
+byte[] GuideConfig(string focus = "1", string chord = "1", string newline = "\n") => Encoding.UTF8.GetBytes(
+    "\"UserLocalConfigStore\"" + newline + "{" + newline + "\"Software\" { \"Valve\" { \"Steam\" {" + newline +
+    "\"Controller_CheckGuideButton\" \"" + focus + "\"" + newline + "\"SteamController_Enable_Chord\" \"" + chord + "\"" + newline +
+    "\"OverlayEnabled\" \"1\" \"SteamController_XBoxSupport\" \"1\" \"Note\" \"玩家\\\\手把\" } } }" + newline + "}" + newline);
+void WithGuideConfig(Action<string, string> test)
+{
+    var dir = Path.Combine(Path.GetTempPath(), "guidedeck-policy-tests-" + Guid.NewGuid()); Directory.CreateDirectory(dir);
+    try { var path = Path.Combine(dir, "localconfig.vdf"); File.WriteAllBytes(path, GuideConfig()); test(path, dir); }
+    finally { Directory.Delete(dir, true); }
+}
+Test("Guide switches read without SDL mapping", () => Check(SteamGuideSettings.Inspect(GuideConfig()).All(s => s.Value == "1")));
+Test("Guide missing fields remain unknown, not disabled", () => {
+    var missing = SteamGuideSettings.Inspect(Encoding.UTF8.GetBytes("\"UserLocalConfigStore\" {}"));
+    Check(missing.Count == 2 && missing.All(s => s.Value == null && s.Location == null));
+});
+Test("Guide preview never adds missing focus key", () => WithGuideConfig((path, dir) => {
+    var text = Encoding.UTF8.GetString(GuideConfig()).Replace("\"Controller_CheckGuideButton\" \"1\"", "// focus missing");
+    File.WriteAllText(path, text); var plan = GuideSettingsTransaction.Preview(path); Check(plan.Changes.Length == 1);
+    _ = GuideSettingsTransaction.Apply(plan, dir, () => {});
+    Check(File.ReadAllText(path) == text.Replace("\"SteamController_Enable_Chord\" \"1\"", "\"SteamController_Enable_Chord\" \"0\""));
+}));
+Test("Guide patch preserves BOM CRLF Unicode escapes overlay and Steam Input", () => WithGuideConfig((path, dir) => {
+    var original = new byte[] {239,187,191}.Concat(GuideConfig(newline: "\r\n")).ToArray(); File.WriteAllBytes(path, original);
+    var plan = GuideSettingsTransaction.Preview(path); Check(plan.Changes.Length == 2);
+    var receipt = GuideSettingsTransaction.Apply(plan, dir, () => {});
+    var expected = Encoding.UTF8.GetString(original).Replace("\"Controller_CheckGuideButton\" \"1\"", "\"Controller_CheckGuideButton\" \"0\"")
+        .Replace("\"SteamController_Enable_Chord\" \"1\"", "\"SteamController_Enable_Chord\" \"0\"");
+    Check(File.ReadAllBytes(path).SequenceEqual(Encoding.UTF8.GetBytes(expected)));
+    Check(!File.ReadAllText(receipt).Contains("Note") && !File.ReadAllText(receipt).Contains("OverlayEnabled"));
+    GuideSettingsTransaction.Restore(GuideSettingsTransaction.PreviewRestore(receipt), () => {});
+    Check(File.ReadAllBytes(path).SequenceEqual(original));
+}));
+Test("Guide only enabled switches enter the plan", () => WithGuideConfig((path, _) => {
+    File.WriteAllBytes(path, GuideConfig(focus: "0")); var plan = GuideSettingsTransaction.Preview(path);
+    Check(plan.Changes.Length == 1 && plan.Changes[0].Key == SteamGuideSettings.ChordKey);
+}));
+Test("Guide disabled values cannot create a no-op backup", () => WithGuideConfig((path, dir) => {
+    File.WriteAllBytes(path, GuideConfig("0", "0")); var plan = GuideSettingsTransaction.Preview(path);
+    Check(plan.Changes.Length == 0); Throws(() => GuideSettingsTransaction.Apply(plan, dir, () => {}));
+    Check(Directory.GetFiles(dir).Count(p => p.EndsWith(".guide-settings.json")) == 0);
+}));
+Test("Guide duplicate Boolean rejected case insensitively", () => Throws(() => SteamGuideSettings.Inspect(Encoding.UTF8.GetBytes(
+    Encoding.UTF8.GetString(GuideConfig()).Replace("\"Note\"", "\"controller_checkguidebutton\" \"0\" \"Note\"")))));
+Test("Guide duplicate ancestor rejected even when second object empty", () => Throws(() => SteamGuideSettings.Inspect(Encoding.UTF8.GetBytes(
+    Encoding.UTF8.GetString(GuideConfig()).Replace("\"Software\"", "\"Software\" {} \"Software\"")))));
+Test("Guide unknown root rejected", () => Throws(() => SteamGuideSettings.Inspect(Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(GuideConfig()).Replace("UserLocalConfigStore", "Other")))));
+Test("Guide unknown value rejected", () => Throws(() => SteamGuideSettings.Inspect(GuideConfig(chord: "true"))));
+Test("Guide unknown nested path rejected", () => Throws(() => SteamGuideSettings.Inspect(Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(GuideConfig()).Replace("\"Valve\"", "\"SomeApp\"")))));
+Test("Guide object/string collision rejected", () => Throws(() => SteamGuideSettings.Inspect(Encoding.UTF8.GetBytes(
+    Encoding.UTF8.GetString(GuideConfig()).Replace("\"Note\"", "\"SteamController_Enable_Chord\" {} \"Note\"")))));
+Test("Guide install store root switches supported", () => Check(SteamGuideSettings.Inspect(Encoding.UTF8.GetBytes(
+    "\"InstallConfigStore\" { \"Controller_CheckGuideButton\" \"1\" }")).Single(s => s.Key == SteamGuideSettings.FocusKey).Value == "1"));
+Test("Guide differently cased keys retain their original spelling", () => WithGuideConfig((path, dir) => {
+    var original = Encoding.UTF8.GetString(GuideConfig()).Replace("Controller_CheckGuideButton", "controller_checkguidebutton"); File.WriteAllText(path, original);
+    _ = GuideSettingsTransaction.Apply(GuideSettingsTransaction.Preview(path), dir, () => {});
+    Check(File.ReadAllText(path).Contains("\"controller_checkguidebutton\" \"0\""));
+}));
+Test("Guide stale plan rejects external changes", () => WithGuideConfig((path, dir) => {
+    var plan = GuideSettingsTransaction.Preview(path); File.AppendAllText(path, "// Steam wrote settings"); var current = File.ReadAllBytes(path);
+    Throws(() => GuideSettingsTransaction.Apply(plan, dir, () => {})); Check(current.SequenceEqual(File.ReadAllBytes(path)));
+}));
+Test("Guide tampered plan cannot change unrelated settings", () => WithGuideConfig((path, dir) => {
+    var plan = GuideSettingsTransaction.Preview(path); plan.Changes[0] = plan.Changes[0] with {Key = "OverlayEnabled"};
+    Throws(() => GuideSettingsTransaction.Apply(plan, dir, () => {})); Check(File.ReadAllBytes(path).SequenceEqual(GuideConfig()));
+}));
+Test("Guide running Steam guard blocks mutation and backup", () => WithGuideConfig((path, dir) => {
+    Throws(() => GuideSettingsTransaction.Apply(GuideSettingsTransaction.Preview(path), dir, () => throw new Exception("Steam running")));
+    Check(File.ReadAllBytes(path).SequenceEqual(GuideConfig())); Check(!Directory.EnumerateFiles(dir, "*.guide-settings.json").Any());
+}));
+Test("Guide late Steam launch aborts atomic replacement", () => WithGuideConfig((path, dir) => {
+    int guarded = 0;
+    Throws(() => GuideSettingsTransaction.Apply(GuideSettingsTransaction.Preview(path), dir, () => { if (++guarded == 2) throw new Exception("Steam started"); }));
+    Check(File.ReadAllBytes(path).SequenceEqual(GuideConfig())); Check(Directory.EnumerateFiles(dir, "*.guide-settings.json").Count() == 1);
+    Check(!Directory.EnumerateFiles(dir, "*.tmp").Any());
+}));
+Test("Guide restore preserves unrelated later settings", () => WithGuideConfig((path, dir) => {
+    var receipt = GuideSettingsTransaction.Apply(GuideSettingsTransaction.Preview(path), dir, () => {}); File.AppendAllText(path, "// unrelated later setting");
+    GuideSettingsTransaction.Restore(GuideSettingsTransaction.PreviewRestore(receipt), () => {});
+    Check(File.ReadAllBytes(path).SequenceEqual(GuideConfig().Concat(Encoding.UTF8.GetBytes("// unrelated later setting"))));
+    var again = GuideSettingsTransaction.PreviewRestore(receipt); Check(again.AlreadyRestored); GuideSettingsTransaction.Restore(again, () => {});
+}));
+Test("Guide restore handles one switch already restored", () => WithGuideConfig((path, dir) => {
+    var receipt = GuideSettingsTransaction.Apply(GuideSettingsTransaction.Preview(path), dir, () => {});
+    File.WriteAllBytes(path, GuideConfig("1", "0")); var plan = GuideSettingsTransaction.PreviewRestore(receipt); Check(plan.Changes.Length == 1);
+    GuideSettingsTransaction.Restore(plan, () => {}); Check(File.ReadAllBytes(path).SequenceEqual(GuideConfig()));
+}));
+Test("Guide restore rejects disappeared switch", () => WithGuideConfig((path, dir) => {
+    var receipt = GuideSettingsTransaction.Apply(GuideSettingsTransaction.Preview(path), dir, () => {});
+    File.WriteAllText(path, "\"UserLocalConfigStore\" {}"); Throws(() => GuideSettingsTransaction.PreviewRestore(receipt));
+}));
+Test("Guide stale restore and edited backup rejected", () => WithGuideConfig((path, dir) => {
+    var receipt = GuideSettingsTransaction.Apply(GuideSettingsTransaction.Preview(path), dir, () => {});
+    var plan = GuideSettingsTransaction.PreviewRestore(receipt); File.AppendAllText(path, "// later"); Throws(() => GuideSettingsTransaction.Restore(plan, () => {}));
+    var backup = JsonSerializer.Deserialize<GuideSettingsBackup>(File.ReadAllText(receipt))!;
+    File.WriteAllText(receipt, JsonSerializer.Serialize(backup with {ChangesHash = "bad"})); Throws(() => GuideSettingsTransaction.PreviewRestore(receipt));
+}));
+Test("Guide repair touches only selected account file", () => WithGuideConfig((path, dir) => {
+    var other = Path.Combine(dir, "other-account"); Directory.CreateDirectory(other); var otherFile = Path.Combine(other, "localconfig.vdf"); File.WriteAllBytes(otherFile, GuideConfig());
+    _ = GuideSettingsTransaction.Apply(GuideSettingsTransaction.Preview(path), dir, () => {});
+    Check(File.ReadAllBytes(otherFile).SequenceEqual(GuideConfig()));
+}));
+Test("Guide operations use the same per-file mutation lock", () => WithGuideConfig((path, dir) => {
+    using var operation = new FileStream(path + ".guidedeck.lock", FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+    Throws(() => GuideSettingsTransaction.Apply(GuideSettingsTransaction.Preview(path), dir, () => {}));
+}));
+
 Console.WriteLine($"{passed} passed; {failed} failed");
 return failed == 0 ? 0 : 1;

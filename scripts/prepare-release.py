@@ -73,7 +73,7 @@ def prepare(source: Path, output: Path, sha: str, run_id: str, version: str) -> 
 測試來源 commit：{sha}
 
 未簽章的開發測試版；Game Bar widget 需開發部署。尚未驗證實體手把、遊戲或反作弊相容性。
-這是 SDL mapping 適配器，沒有全系統攔截驅動，不能保證涵蓋所有 Steam 輸入路徑。
+這是 Steam Guide 設定管理與進階 mapping 工具，沒有全系統攔截驅動，效果仍需實機驗收。
 """)
 
 

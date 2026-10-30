@@ -58,4 +58,28 @@ PASS manual light overrides dark system
 PASS manual dark overrides light system
 PASS high contrast overrides every appearance preference
 PASS unknown stored theme normalizes to system
-60 passed; 0 failed
+PASS Guide switches read without SDL mapping
+PASS Guide missing fields remain unknown, not disabled
+PASS Guide preview never adds missing focus key
+PASS Guide patch preserves BOM CRLF Unicode escapes overlay and Steam Input
+PASS Guide only enabled switches enter the plan
+PASS Guide disabled values cannot create a no-op backup
+PASS Guide duplicate Boolean rejected case insensitively
+PASS Guide duplicate ancestor rejected even when second object empty
+PASS Guide unknown root rejected
+PASS Guide unknown value rejected
+PASS Guide unknown nested path rejected
+PASS Guide object/string collision rejected
+PASS Guide install store root switches supported
+PASS Guide differently cased keys retain their original spelling
+PASS Guide stale plan rejects external changes
+PASS Guide tampered plan cannot change unrelated settings
+PASS Guide running Steam guard blocks mutation and backup
+PASS Guide late Steam launch aborts atomic replacement
+PASS Guide restore preserves unrelated later settings
+PASS Guide restore handles one switch already restored
+PASS Guide restore rejects disappeared switch
+PASS Guide stale restore and edited backup rejected
+PASS Guide repair touches only selected account file
+PASS Guide operations use the same per-file mutation lock
+84 passed; 0 failed

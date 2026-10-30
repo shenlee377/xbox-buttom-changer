@@ -1,3 +1,13 @@
+GuideDeck 0.4 pending Windows verification — 2026-10-30
+
+Local: PASS 84 core cases, PASS WPF cross-build, PASS 16 theme contrast pairs.
+New cases cover existing focus/chord Boolean changes without SDL mappings,
+missing keys as unknown, byte preservation, account isolation, stale plans,
+Steam-running guards, scoped backup/restore and ambiguous-format rejection.
+No actual Windows Steam/controller behavior has been reproduced on this host.
+See docs/STEAM-GUIDE-RESEARCH.txt for direct client-package evidence and limits.
+The previous 0.3 verification below does not constitute a 0.4 Windows pass.
+
 GuideDeck 0.3 validation — 2026-10-30
 
 Confirmed successful CI:

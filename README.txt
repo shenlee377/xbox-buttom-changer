@@ -1,10 +1,10 @@
-GuideDeck 0.3 — Xbox Button Changer
+GuideDeck 0.4 — Xbox Button Changer
 2026-10-30
 ============================================================
 
 目的與目前邊界
 保留微軟原生 Guide → Game Bar；研究阻止 Steam 對同一次 Guide 觸發
-聚焦、Big Picture 或遊戲 Overlay。此版使用 Steam SDL mapping 覆寫，
+聚焦、Big Picture 或遊戲 Overlay。此版優先管理 Steam 原生聚焦與 Guide 組合鍵開關，進階頁保留 SDL mapping 工具，
 不是已完成的全系統 Guide 防火牆。沒有驅動、程序注入、記憶體修改、
 全域鍵盤模擬或強制終止 Steam。不修改 Steam Input／Overlay 啟用開關。
 
@@ -15,14 +15,27 @@ GuideDeck 0.3 — Xbox Button Changer
 下載與安裝
 https://github.com/shenlee377/xbox-buttom-changer/releases
 
+先修正大螢幕啟動：
+  在「Steam Guide」頁開啟 Steam → 設定 → 控制器（部分版本在進階設定）。
+  關閉 Guide button focuses Steam 與 Enable Guide Button Chords for controllers。
+  後者也會停用 Steam Guide 快捷操作，普通 Steam Input 與 Shift+Tab 不改。
+  完整離開 Steam 後，可選目前帳號 localconfig.vdf 或安裝 config.vdf，
+  檢查／預覽／備份並關閉已存在的已知 0/1 開關；缺少欄位是未知，
+  不會自動插入猜測值。帳號與安裝設定可能分開儲存，需分別核對。
+  Guide 備份是 *.guide-settings.json，只存修改欄位，不複製整份設定。
+  Steam 執行中拒絕寫入；偵測設定寫回後撤銷預覽，局部還原保留其他變更。
+  重啟後測試背景／前景／遊戲、單按／連按／長按與 Game Bar／Shift+Tab。
+  0.3 的 mapping 修改不足以阻止所有大螢幕路徑，不要反覆套用它。
+  依據與限制：docs/STEAM-GUIDE-RESEARCH.txt。
+
 免安裝：下載 GuideDeck-windows-x64.zip，解壓縮後執行 GuideDeck.exe。
 內含 .NET runtime，預設不需要管理員權限。
 
 安裝腳本：下載並檢視 Install-GuideDeck.ps1，依自己的 PowerShell
 執行原則執行：
-  .\Install-GuideDeck.ps1 -Version v0.3.0
+  .\Install-GuideDeck.ps1 -Version v0.4.0
   # 選配：安裝後開啟
-  .\Install-GuideDeck.ps1 -Version v0.3.0 -Launch
+  .\Install-GuideDeck.ps1 -Version v0.4.0 -Launch
 
 腳本會下載指定 Release 的 ZIP 與 SHA256SUMS.txt、驗證完整性，安裝至
 %LOCALAPPDATA%\Programs\GuideDeck 並建立開始功能表捷徑。SHA-256 核對
@@ -40,6 +53,7 @@ https://github.com/shenlee377/xbox-buttom-changer/releases
 
 使用流程
 1. 偵測 Steam 或選擇 Steam/config/config.vdf。
+（以下 mapping 流程是進階實驗功能，不是主要大螢幕修正。）
 2. 核對控制器 GUID／CRC，選擇一筆 mapping，閱讀前後差異。
 3. 完整離開 Steam，確認實驗性修改，按「備份並套用」。
 4. 重新啟動 Steam，在桌面／遊戲中完成驗收。
