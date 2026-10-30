@@ -1,37 +1,39 @@
-GuideDeck 0.2 validation — 2026-10-30
+GuideDeck 0.3 validation — 2026-10-30
 
-Local execution host: Linux x64, .NET 8.0.427.
+Confirmed successful CI:
+  Run: 41069316292
+  Commit: a80144585ec2f328e1eb640d448838a7c4c88253
+  https://github.com/shenlee377/xbox-buttom-changer/actions/runs/41069316292
 
-Core regression suite covers mapping preservation, unknown-format rejection,
-selected-controller patching, scoped restoration, legacy receipt recovery,
-stale plans, backup integrity, and observation state evaluation.
-Exact output is recorded in TEST-RESULTS.txt.
-
-Windows-targeted WPF cross-build is run locally. GitHub Actions additionally
-builds on Windows and attempts UWP packaging, desktop startup, single-instance
-activation and installation/uninstallation. See the exact workflow run result:
-https://github.com/shenlee377/xbox-buttom-changer/actions
-The presence of a workflow file does not mean the workflow passed.
-
-Confirmed successful Windows CI:
-  Run: 41060408959
-  Commit: 4c2539670940a4833e0c5a8f22bc13f12f5f329f
-  https://github.com/shenlee377/xbox-buttom-changer/actions/runs/41060408959
-  PASS 54 core tests on Linux and Windows
+  PASS 60 core regression cases on Linux and Windows
+  PASS 16 semantic color contrast pairs for light/dark themes
   PASS Windows WPF desktop build/publish
   PASS UWP C#/XAML compilation and unsigned MSIX package generation
-  PASS desktop startup and second-instance activation
-  PASS single-file companion startup and second-instance activation
-  PASS rejection of incorrect installer checksum
+  PASS desktop and single-file startup / second-instance activation
+  PASS real WPF light/dark PNG rendering without persisting temporary choices
+  PASS running desktop follows Windows AppsUseLightTheme changes
+  PASS appearance preference file changes update the running desktop
+  PASS manual light/dark choice overrides subsequent system theme changes
+  PASS incorrect installer checksum rejection
   PASS offline per-user install, repeated update and uninstall
-Release binaries were taken from this run's uploaded artifact, not a later
-unverified local rebuild. The standalone EXE is the tested single-file
-companion extracted from the produced MSIX. The development MSIX is unsigned.
 
-NOT VALIDATED: actual Steam mapping effectiveness, Xbox USB/Bluetooth/Wireless
-hardware behavior, Game Bar game input isolation, game-specific behavior,
-third-party launchers, anti-cheat/antivirus compatibility, Microsoft Store
-certification, or production signing.
+Theme switching test changes only the ephemeral GitHub Actions runner's
+registry, restores it in finally, and refuses to run outside GitHub Actions.
+Contrast checks cover specified semantic pairs, not every possible OS control.
+PNG renders cover the desktop setup page, excluding native window chrome.
+Core fixtures are synthetic; no personal Steam configuration was used.
 
-No claim is made that Guide is blocked across all Steam input paths.
-All fixtures are synthetic. No personal Steam configuration was used.
+Release binaries use this run's uploaded artifact, not a later local rebuild.
+The single-file EXE is extracted from the tested package's desktop companion.
+The Game Bar development MSIX is unsigned.
+
+NOT VALIDATED: physical controller / Steam mapping effectiveness, actual
+Game Bar widget execution and host theme changes, manual high-contrast or
+screen-reader inspection, hardware USB/Bluetooth/Wireless differences,
+game-specific input isolation, other launchers, anti-cheat/antivirus
+compatibility, Store certification, or production signing.
+There is no claim that Guide is blocked across all Steam input paths.
+
+Previous 0.2 baseline: run 41060408959,
+commit 4c2539670940a4833e0c5a8f22bc13f12f5f329f.
+Exact core output is in TEST-RESULTS.txt.

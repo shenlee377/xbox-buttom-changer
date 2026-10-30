@@ -1,5 +1,8 @@
 name: Publish verified release
 on:
+  push:
+    branches: [main]
+    paths: ['.github/release-request.json']
   workflow_dispatch:
     inputs:
       verified_run_id:
@@ -24,11 +27,24 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Require a successful trusted build
         id: checked
         uses: actions/github-script@v7
         with:
           script: |
+            let mode = 'publish';
+            if (context.eventName === 'push') {
+              const request = JSON.parse(require('fs').readFileSync('.github/release-request.json', 'utf8'));
+              if (request.schema !== 1 || !['preview', 'publish'].includes(request.mode)) throw new Error('Invalid release request');
+              process.env.RUN_ID = String(request.runId);
+              process.env.RELEASE_VERSION = request.version;
+              mode = request.mode;
+              core.exportVariable('RUN_ID', process.env.RUN_ID);
+              core.exportVariable('RELEASE_VERSION', process.env.RELEASE_VERSION);
+            }
             if (!/^[0-9]+$/.test(process.env.RUN_ID)) throw new Error('Invalid run ID');
             if (!/^v[0-9]+\.[0-9]+\.[0-9]+$/.test(process.env.RELEASE_VERSION)) throw new Error('Invalid version');
             const {data: run} = await github.rest.actions.getWorkflowRun({...context.repo, run_id: Number(process.env.RUN_ID)});
@@ -37,20 +53,42 @@ jobs:
               throw new Error('Only a successful trusted main-branch build can be published');
             }
             core.setOutput('sha', run.head_sha);
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+            core.setOutput('run_id', process.env.RUN_ID);
+            core.setOutput('mode', mode)
       - uses: actions/download-artifact@v4
         with:
           github-token: ${{ github.token }}
-          run-id: ${{ inputs.verified_run_id }}
+          run-id: ${{ steps.checked.outputs.run_id }}
           name: GuideDeck-windows
           path: verified
+      - uses: actions/download-artifact@v4
+        if: steps.checked.outputs.mode == 'preview'
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ steps.checked.outputs.run_id }}
+          name: GuideDeck-ui-previews
+          path: previews
+      - name: Save actual renders for visual review
+        if: steps.checked.outputs.mode == 'preview'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p docs/images
+          cp previews/desktop-light.png previews/desktop-dark.png docs/images/
+          git add docs/images/desktop-light.png docs/images/desktop-dark.png
+          if ! git diff --cached --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "Document verified light and dark UI renders [skip ci]"
+            git push origin HEAD:main
+          fi
       - name: Prepare verified EXE, ZIP and scripts
+        if: steps.checked.outputs.mode == 'publish'
         env:
           TESTED_SHA: ${{ steps.checked.outputs.sha }}
         run: python3 scripts/prepare-release.py verified release "$TESTED_SHA" "$RUN_ID" "$RELEASE_VERSION"
       - name: Upload and publish prerelease
+        if: steps.checked.outputs.mode == 'publish'
         env:
           TESTED_SHA: ${{ steps.checked.outputs.sha }}
         shell: bash

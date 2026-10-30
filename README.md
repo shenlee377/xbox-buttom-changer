@@ -18,6 +18,14 @@
 - 偵測設定漂移、撤銷過期預覽、保存與匯出有範圍的人工驗收紀錄。
 - Game Bar widget 可使用同一套 mapping 規則、開啟同套件桌面管理器、查看最近檢查摘要。
 
+**實際介面預覽**
+
+以下圖片來自已通過驗證的 Windows WPF 程式渲染，並非概念稿。
+
+| 淺色 | 深色 |
+| --- | --- |
+| ![GuideDeck 淺色介面](docs/images/desktop-light.png) | ![GuideDeck 深色介面](docs/images/desktop-dark.png) |
+
 **取得與安裝**
 
 從 [Releases](https://github.com/shenlee377/xbox-buttom-changer/releases) 下載 `GuideDeck-windows-x64.zip`，解壓縮後執行 `GuideDeck.exe`。不需要另外安裝 .NET runtime。
@@ -47,9 +55,11 @@ dotnet run --project tests/GuideDeck.Tests -c Release
 
 GitHub Actions 分別執行核心測試與 Windows 桌面／UWP 建置。成功建置不代表手把行為或反作弊相容性已驗證；請閱讀 [VALIDATION.txt](VALIDATION.txt)。
 
-0.2 的 [Windows CI 驗證](https://github.com/shenlee377/xbox-buttom-changer/actions/runs/41060408959)已通過：54 項核心測試、UWP 套件建置、桌面與單檔版啟動／單一實例，以及安裝、更新、校驗拒絕與移除測試。
+0.3 的 [Windows CI 驗證](https://github.com/shenlee377/xbox-buttom-changer/actions/runs/41069316292)已通過：60 項核心測試、深淺色對比、實際 UI 渲染、系統主題即時切換、手動外觀覆寫，以及桌面／UWP 建置、啟動與安裝流程。
 
 後續發版可在 Actions 選 **Publish verified release**，填入成功的主分支建置 run ID 和新版本 tag。流程會取用該次已測試的產物、驗證校驗、上傳 EXE／ZIP／腳本並發布 prerelease；拒絕覆蓋已發布版本，不需在本機重新打包。
+
+亦可在主分支更新 `.github/release-request.json`，指定成功建置的 `runId`、`version` 與 `mode`：`preview` 保存該次實際介面圖片供檢查，`publish` 發布已驗證產物。兩種方式均檢查建置來源與成功狀態；公開 Release 不會被覆蓋。
 
 **實機驗收目標**
 
