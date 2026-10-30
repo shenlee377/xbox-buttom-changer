@@ -43,6 +43,8 @@ public partial class App : Application
             });
         }, null, Timeout.Infinite, false);
         base.OnStartup(e);
+        MainWindow = new MainWindow();
+        MainWindow.Show();
     }
     protected override void OnExit(ExitEventArgs e)
     {
