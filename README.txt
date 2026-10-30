@@ -1,4 +1,4 @@
-GuideDeck 0.2 — Xbox Button Changer
+GuideDeck 0.3 — Xbox Button Changer
 2026-10-30
 ============================================================
 
@@ -20,9 +20,9 @@ https://github.com/shenlee377/xbox-buttom-changer/releases
 
 安裝腳本：下載並檢視 Install-GuideDeck.ps1，依自己的 PowerShell
 執行原則執行：
-  .\Install-GuideDeck.ps1 -Version v0.2.0
+  .\Install-GuideDeck.ps1 -Version v0.3.0
   # 選配：安裝後開啟
-  .\Install-GuideDeck.ps1 -Version v0.2.0 -Launch
+  .\Install-GuideDeck.ps1 -Version v0.3.0 -Launch
 
 腳本會下載指定 Release 的 ZIP 與 SHA256SUMS.txt、驗證完整性，安裝至
 %LOCALAPPDATA%\Programs\GuideDeck 並建立開始功能表捷徑。SHA-256 核對
@@ -147,3 +147,11 @@ https://gist.github.com/rosswd/c0c8b46d1ae5bb4f02207b6195392f93
 Valve Overlay／快捷鍵：https://help.steampowered.com/en/faqs/view/3978-072C-18DF-FBF9
 Game Bar：https://github.com/microsoft/XboxGameBarSamples
 同套件桌面啟動：https://learn.microsoft.com/en-us/uwp/api/windows.applicationmodel.fulltrustprocesslauncher
+
+0.3 外觀與介面
+左側導覽與分步卡片；主要套用／還原固定在設定頁底部。右上角可選
+跟隨系統、淺色、深色，即時生效並儲存 appearance.json。高對比優先。
+Game Bar 自動模式尊重宿主 RequestedTheme；同套件桌面與 widget 共用
+偏好並在執行中更新。一般程式不修改 Windows 的主題登錄值。
+CI 另檢查主題色對比、實際 WPF 深淺色渲染與即時系統設定變更。
+詳細設計：docs/UI-DESIGN.txt。

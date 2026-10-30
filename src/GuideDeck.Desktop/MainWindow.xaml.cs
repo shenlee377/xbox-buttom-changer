@@ -21,6 +21,7 @@ public partial class MainWindow : Window
     private Preferences preferences = new("", null, null);
     private string? observedHash;
     private bool busy, monitoring, closed;
+    private bool updatingAppearance, capturing;
     private static string DataDirectory => DesktopStorage.Root;
     private static string BackupDirectory => Path.Combine(DataDirectory, "Backups");
     private static string ReportDirectory => Path.Combine(DataDirectory, "Reports");
@@ -29,6 +30,10 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        var themes = ((App)Application.Current).Themes;
+        themes.Attach(this);
+        themes.Changed += UpdateAppearance;
+        UpdateAppearance();
         foreach (var criterion in ValidationRules.Labels)
         {
             ChecksPanel.Children.Add(new TextBlock {Text = criterion, Margin = new Thickness(0, 6, 0, 3)});
@@ -41,6 +46,9 @@ public partial class MainWindow : Window
         TestScope.SelectionChanged += (_, _) => InvalidateObservations();
         Loaded += (_, _) =>
         {
+            var workArea = SystemParameters.WorkArea;
+            MinWidth = Math.Min(MinWidth, workArea.Width); MinHeight = Math.Min(MinHeight, workArea.Height);
+            Width = Math.Min(Width, workArea.Width); Height = Math.Min(Height, workArea.Height);
             Run(() => {
                 if (File.Exists(PreferencesPath)) preferences = AppFiles.Load<Preferences>(PreferencesPath) ?? preferences;
                 if (File.Exists(preferences.ConfigPath)) { ConfigPath.Text = preferences.ConfigPath; Inspect(); }
@@ -49,7 +57,31 @@ public partial class MainWindow : Window
             monitor.Start();
         };
         monitor.Tick += async (_, _) => await MonitorAsync();
-        Closed += (_, _) => { closed = true; monitor.Stop(); };
+        Closed += (_, _) => { closed = true; monitor.Stop(); themes.Changed -= UpdateAppearance; };
+        ContentRendered += async (_, _) => {
+            var directory = ((App)Application.Current).CaptureDirectory;
+            if (directory == null || capturing) return;
+            capturing = true;
+            try { await UiCapture.SaveAsync(this, directory); Application.Current.Shutdown(0); }
+            catch (Exception error) { Directory.CreateDirectory(directory); File.WriteAllText(Path.Combine(directory, "capture-error.txt"), error.ToString()); Application.Current.Shutdown(1); }
+        };
+    }
+    private void UpdateAppearance()
+    {
+        if (AppearanceChoice == null) return;
+        var themes = ((App)Application.Current).Themes;
+        updatingAppearance = true;
+        try {
+            AppearanceChoice.SelectedIndex = (int)themes.Mode;
+            ThemeStatus.Text = themes.Variant == ThemeVariant.HighContrast ? "高對比模式優先" :
+                (themes.Mode == ThemeMode.System ? "跟隨系統 · " : "已記住外觀 · ") + (themes.Variant == ThemeVariant.Dark ? "深色" : "淺色");
+        } finally { updatingAppearance = false; }
+    }
+    private void AppearanceChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (updatingAppearance || AppearanceChoice.SelectedIndex < 0) return;
+        Run(() => ((App)Application.Current).Themes.SetMode((ThemeMode)AppearanceChoice.SelectedIndex));
+        UpdateAppearance();
     }
     private void Run(Action action)
     {
@@ -151,7 +183,8 @@ public partial class MainWindow : Window
     });
     private bool ShowRestorePreview(RestorePreview plan)
     {
-        var dialog = new Window {Title = "還原預覽 · " + plan.Identity, Owner = this, Width = 760, Height = 470, WindowStartupLocation = WindowStartupLocation.CenterOwner, Background = Background};
+        var dialog = new Window {Title = "還原預覽 · " + plan.Identity, Owner = this, Width = 760, Height = 470, WindowStartupLocation = WindowStartupLocation.CenterOwner};
+        ((App)Application.Current).Themes.Attach(dialog);
         var stack = new StackPanel {Margin = new Thickness(20)};
         stack.Children.Add(new TextBlock {Text = plan.AlreadyRestored ? "已還原，無需再次寫入。" : "只還原以下 mapping；其他設定不變。請完整離開 Steam。"});
         foreach (var value in new[] {plan.CurrentMapping, plan.RestoredMapping})

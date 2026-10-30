@@ -1,5 +1,5 @@
 param(
-    [ValidatePattern('^v[0-9]+\.[0-9]+\.[0-9]+$')][string]$Version = 'v0.2.0',
+    [ValidatePattern('^v[0-9]+\.[0-9]+\.[0-9]+$')][string]$Version = 'v0.3.0',
     [string]$ArchivePath,
     [string]$ChecksumFile,
     [switch]$SkipShortcut,

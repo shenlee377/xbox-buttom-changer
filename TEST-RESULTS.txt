@@ -52,4 +52,10 @@ PASS desktop overlay check may be inapplicable with reason
 PASS not applicable requires explanation
 PASS empty observation report rejected
 PASS report file roundtrip and duplicate prevention
-54 passed; 0 failed
+PASS system appearance follows light apps preference
+PASS system appearance follows dark apps preference
+PASS manual light overrides dark system
+PASS manual dark overrides light system
+PASS high contrast overrides every appearance preference
+PASS unknown stored theme normalizes to system
+60 passed; 0 failed

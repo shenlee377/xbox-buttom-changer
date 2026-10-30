@@ -1,38 +1,40 @@
-<Page x:Class="GuideDeck.GameBar.MainPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+<Page x:Class="GuideDeck.GameBar.MainPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="{ThemeResource WidgetBackgroundBrush}">
+ <Page.Resources><ResourceDictionary>
+  <ResourceDictionary.ThemeDictionaries>
+   <ResourceDictionary x:Key="Light">
+    <SolidColorBrush x:Key="WidgetBackgroundBrush" Color="#F4F6F8"/><SolidColorBrush x:Key="WidgetCardBrush" Color="White"/><SolidColorBrush x:Key="WidgetBorderBrush" Color="#D5DDE3"/><SolidColorBrush x:Key="WidgetMutedBrush" Color="#52636E"/><SolidColorBrush x:Key="WidgetAccentBrush" Color="#08783F"/><SolidColorBrush x:Key="WidgetAccentTextBrush" Color="White"/><SolidColorBrush x:Key="WidgetNoticeBrush" Color="#FFF4DD"/><SolidColorBrush x:Key="WidgetNoticeTextBrush" Color="#775019"/>
+   </ResourceDictionary>
+   <ResourceDictionary x:Key="Dark">
+    <SolidColorBrush x:Key="WidgetBackgroundBrush" Color="#11171B"/><SolidColorBrush x:Key="WidgetCardBrush" Color="#1B242A"/><SolidColorBrush x:Key="WidgetBorderBrush" Color="#40515C"/><SolidColorBrush x:Key="WidgetMutedBrush" Color="#A7B8C3"/><SolidColorBrush x:Key="WidgetAccentBrush" Color="#85DDA8"/><SolidColorBrush x:Key="WidgetAccentTextBrush" Color="#10291C"/><SolidColorBrush x:Key="WidgetNoticeBrush" Color="#392F20"/><SolidColorBrush x:Key="WidgetNoticeTextBrush" Color="#F0CE94"/>
+   </ResourceDictionary>
+   <ResourceDictionary x:Key="HighContrast">
+    <SolidColorBrush x:Key="WidgetBackgroundBrush" Color="{ThemeResource SystemColorWindowColor}"/><SolidColorBrush x:Key="WidgetCardBrush" Color="{ThemeResource SystemColorWindowColor}"/><SolidColorBrush x:Key="WidgetBorderBrush" Color="{ThemeResource SystemColorWindowTextColor}"/><SolidColorBrush x:Key="WidgetMutedBrush" Color="{ThemeResource SystemColorWindowTextColor}"/><SolidColorBrush x:Key="WidgetAccentBrush" Color="{ThemeResource SystemColorHighlightColor}"/><SolidColorBrush x:Key="WidgetAccentTextBrush" Color="{ThemeResource SystemColorHighlightTextColor}"/><SolidColorBrush x:Key="WidgetNoticeBrush" Color="{ThemeResource SystemColorWindowColor}"/><SolidColorBrush x:Key="WidgetNoticeTextBrush" Color="{ThemeResource SystemColorWindowTextColor}"/>
+   </ResourceDictionary>
+  </ResourceDictionary.ThemeDictionaries>
+  <Style TargetType="TextBlock"><Setter Property="TextWrapping" Value="Wrap"/></Style>
+  <Style x:Key="Card" TargetType="Border"><Setter Property="Background" Value="{ThemeResource WidgetCardBrush}"/><Setter Property="BorderBrush" Value="{ThemeResource WidgetBorderBrush}"/><Setter Property="BorderThickness" Value="1"/><Setter Property="CornerRadius" Value="8"/><Setter Property="Padding" Value="16"/><Setter Property="Margin" Value="0,0,0,12"/></Style>
+  <Style TargetType="Button"><Setter Property="MinHeight" Value="44"/><Setter Property="Padding" Value="12,10"/><Setter Property="HorizontalAlignment" Value="Stretch"/></Style>
+  <Style x:Key="PrimaryButton" TargetType="Button"><Setter Property="MinHeight" Value="44"/><Setter Property="Padding" Value="12,10"/><Setter Property="HorizontalAlignment" Value="Stretch"/><Setter Property="Background" Value="{ThemeResource WidgetAccentBrush}"/><Setter Property="Foreground" Value="{ThemeResource WidgetAccentTextBrush}"/></Style>
+ </ResourceDictionary></Page.Resources>
  <Grid Padding="16"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-  <StackPanel><TextBlock Text="GuideDeck" FontSize="26" FontWeight="SemiBold"/><TextBlock Text="Steam Guide 綁定實驗工作台" Margin="0,4,0,8"/></StackPanel>
+  <Grid Margin="0,0,0,10"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="170"/></Grid.ColumnDefinitions>
+   <StackPanel VerticalAlignment="Center"><TextBlock Text="GuideDeck" FontSize="25" FontWeight="SemiBold"/><TextBlock Text="Xbox 按鈕管理" Foreground="{ThemeResource WidgetMutedBrush}" FontSize="12" Margin="0,4,0,0"/></StackPanel>
+   <ComboBox x:Name="AppearanceChoice" Grid.Column="1" Header="外觀" HorizontalAlignment="Stretch" AutomationProperties.Name="外觀模式" SelectionChanged="AppearanceChanged"><ComboBoxItem Content="跟隨系統／Game Bar"/><ComboBoxItem Content="淺色"/><ComboBoxItem Content="深色"/></ComboBox>
+  </Grid>
   <Pivot x:Name="Sections" Grid.Row="1">
-   <PivotItem Header="狀態"><ScrollViewer><StackPanel Spacing="12">
-    <TextBlock Text="原生 Game Bar 保留" FontSize="22"/>
-    <TextBlock Text="此 widget 不攔截、不模擬 Guide。Steam 是否仍有響應，需要在您的手把與遊戲中測試。" TextWrapping="Wrap"/>
-    <TextBlock x:Name="Summary" Text="尚未取得桌面管理器的檢查摘要。" Foreground="#FFE1AE" TextWrapping="Wrap"/>
-    <Button Content="開啟同套件的桌面管理器" Click="OpenManager"/>
-    <Button Content="更新最近檢查摘要" Click="RefreshSummary"/>
-    <TextBlock Text="1. 在 Steam 控制器設定匯出自己的 SDL mapping。&#10;2. 到「mapping」只移除 Guide，保留原始字串。&#10;3. 將結果貼回 Steam（若該版本提供匯入）。&#10;4. 回到「驗收」記錄結果。" TextWrapping="Wrap"/>
-    <TextBlock Text="不要停用整個 Steam Input 或 Overlay。若 Steam 未採用 mapping，這條路徑無效，請恢復原始 mapping。" TextWrapping="Wrap"/>
-    <TextBlock Text="桌面管理器可讀寫 Steam 設定；操作時會開啟桌面視窗，可能切出遊戲。摘要超過 30 秒會標示過期，不把舊資料當成即時狀態。" TextWrapping="Wrap"/>
+   <PivotItem Header="總覽"><ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel>
+    <Border Style="{StaticResource Card}"><StackPanel Spacing="12"><TextBlock Text="保留 Game Bar 原生入口" FontSize="20" FontWeight="SemiBold"/><TextBlock x:Name="Summary" Text="尚未取得桌面管理器的檢查摘要。" Foreground="{ThemeResource WidgetMutedBrush}"/><Button Content="開啟桌面管理器" Style="{StaticResource PrimaryButton}" Click="OpenManager"/><Button Content="更新檢查摘要" Click="RefreshSummary"/><TextBlock Text="開啟桌面視窗可能切出遊戲。摘要超過 30 秒會標示過期，不代表即時攔截狀態。" FontSize="12" Foreground="{ThemeResource WidgetMutedBrush}"/></StackPanel></Border>
+    <Border Style="{StaticResource Card}"><StackPanel Spacing="10"><TextBlock Text="下一步" FontSize="17" FontWeight="SemiBold"/><TextBlock Text="01　匯出自己的控制器 mapping&#10;02　在「對應」預覽 Guide 移除結果&#10;03　貼回 Steam，並到「驗收」記錄效果"/><TextBlock Text="保持 Steam Input 與整體 Overlay 可用。若此路徑無效，請還原原始 mapping。" FontSize="12" Foreground="{ThemeResource WidgetMutedBrush}"/></StackPanel></Border>
+    <Border Background="{ThemeResource WidgetNoticeBrush}" CornerRadius="6" Padding="12"><TextBlock Text="實驗性 Steam 適配器，尚未涵蓋所有輸入路徑或其他啟動器。" Foreground="{ThemeResource WidgetNoticeTextBrush}" FontSize="12"/></Border>
    </StackPanel></ScrollViewer></PivotItem>
-   <PivotItem Header="mapping"><ScrollViewer><StackPanel Spacing="10">
-    <TextBlock Text="只移除一行 mapping 裡的 guide:bN" TextWrapping="Wrap"/>
-    <Button Content="貼上自己的 mapping" Click="Paste"/>
-    <TextBox x:Name="Input" Header="原始 mapping" AcceptsReturn="True" TextWrapping="Wrap" Height="110" TextChanged="InputChanged"/>
-    <Button Content="預覽 Guide 移除結果" Click="Preview"/>
-    <TextBox x:Name="Output" Header="結果（尚未套用至 Steam）" IsReadOnly="True" TextWrapping="Wrap" Height="110"/>
-    <CheckBox x:Name="Consent" Content="了解會移除此 mapping 的 Steam Guide／chord 綁定；效果待測試。"/>
-    <Button x:Name="CopyButton" Content="備份原始 mapping 並複製結果" Click="Copy" IsEnabled="False"/>
-    <Button Content="複製最近一次備份的原始 mapping" Click="RestoreClipboard"/>
+   <PivotItem Header="對應"><ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel>
+    <Border Style="{StaticResource Card}"><StackPanel Spacing="10"><TextBlock Text="01　匯入自己的 mapping" FontSize="18" FontWeight="SemiBold"/><Button Content="從剪貼簿貼上" Click="Paste"/><TextBox x:Name="Input" Header="原始 SDL mapping" AcceptsReturn="True" TextWrapping="Wrap" Height="120" TextChanged="InputChanged" FontFamily="Consolas"/><Button Content="預覽移除 Guide" Click="Preview"/></StackPanel></Border>
+    <Border Style="{StaticResource Card}"><StackPanel Spacing="10"><TextBlock Text="02　預覽與複製" FontSize="18" FontWeight="SemiBold"/><TextBox x:Name="Output" Header="結果（尚未套用至 Steam）" IsReadOnly="True" TextWrapping="Wrap" Height="120" FontFamily="Consolas"/><CheckBox x:Name="Consent"><TextBlock Text="我了解會移除此 mapping 的 Steam Guide／組合鍵綁定，效果需實測。"/></CheckBox><Button x:Name="CopyButton" Content="備份並複製結果" Style="{StaticResource PrimaryButton}" Click="Copy" IsEnabled="False"/><Button Content="複製最近的原始備份" Click="RestoreClipboard"/></StackPanel></Border>
    </StackPanel></ScrollViewer></PivotItem>
-   <PivotItem Header="驗收"><ScrollViewer><StackPanel Spacing="10">
-    <TextBlock Text="人工觀察記錄，非自動偵測" Foreground="#FFE1AE"/>
-    <TextBox x:Name="Game" Header="遊戲名稱／桌面"/>
-    <TextBox x:Name="Context" Header="手把、連接方式、Steam 版本"/>
-    <ComboBox x:Name="Scope" Header="情境" SelectedIndex="0"><ComboBoxItem Content="桌面：Steam 未聚焦"/><ComboBoxItem Content="桌面：Steam 已聚焦"/><ComboBoxItem Content="Steam 遊戲"/><ComboBoxItem Content="非 Steam 遊戲"/></ComboBox>
-    <StackPanel x:Name="Checks" Spacing="8"/>
-    <TextBox x:Name="Notes" Header="說明（不適用項目必填）" AcceptsReturn="True" TextWrapping="Wrap"/>
-    <Button Content="儲存觀察記錄" Click="SaveReport"/>
-    <TextBlock Text="其他啟動器尚未實作；此工作台不代表通用第三方 Guide 封鎖。" TextWrapping="Wrap"/>
+   <PivotItem Header="驗收"><ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel>
+    <Border Style="{StaticResource Card}"><StackPanel Spacing="12"><TextBlock Text="記錄這次測試" FontSize="20" FontWeight="SemiBold"/><TextBlock Text="人工觀察，非自動偵測。widget 不直接讀取 Steam 原檔，紀錄不綁定目前設定。" FontSize="12" Foreground="{ThemeResource WidgetMutedBrush}"/><TextBox x:Name="Game" Header="遊戲名稱／桌面"/><TextBox x:Name="Context" Header="手把、連接方式與 Steam 版本"/><ComboBox x:Name="Scope" Header="測試情境" SelectedIndex="0" HorizontalAlignment="Stretch"><ComboBoxItem Content="桌面：Steam 未聚焦"/><ComboBoxItem Content="桌面：Steam 已聚焦"/><ComboBoxItem Content="Steam 遊戲"/><ComboBoxItem Content="非 Steam 遊戲"/></ComboBox><StackPanel x:Name="Checks" Spacing="12"/><TextBox x:Name="Notes" Header="說明（不適用項目必填）" AcceptsReturn="True" TextWrapping="Wrap"/><Button Content="儲存這次觀察" Style="{StaticResource PrimaryButton}" Click="SaveReport"/></StackPanel></Border>
    </StackPanel></ScrollViewer></PivotItem>
   </Pivot>
-  <TextBlock x:Name="Status" Grid.Row="2" Text="尚未修改設定或剪貼簿。" TextWrapping="Wrap" Margin="0,8,0,0" AutomationProperties.LiveSetting="Polite"/>
+  <Border Grid.Row="2" Background="{ThemeResource WidgetCardBrush}" BorderBrush="{ThemeResource WidgetBorderBrush}" BorderThickness="1" Padding="10" CornerRadius="6" Margin="0,10,0,0"><TextBlock x:Name="Status" Text="尚未修改設定或剪貼簿。" TextWrapping="Wrap" FontSize="12" AutomationProperties.LiveSetting="Polite"/></Border>
  </Grid>
 </Page>

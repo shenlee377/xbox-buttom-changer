@@ -162,5 +162,11 @@ Test("desktop overlay check may be inapplicable with reason", () => { var r = Re
 Test("not applicable requires explanation", () => { var r = Report(); var d = new Dictionary<string, Observation>(r.Results) {["haptics"] = Observation.NotApplicable}; Throws(() => ValidationRules.Validate(r with {Results = d})); });
 Test("empty observation report rejected", () => Throws(() => ValidationRules.Validate(Report() with {Results = ValidationRules.Keys.ToDictionary(k => k, _ => Observation.Untested)})));
 Test("report file roundtrip and duplicate prevention", () => WithConfig((_, dir) => { var r = Report(); var file = AppFiles.SaveReport(dir, r); Check(AppFiles.Load<ValidationReport>(file)!.Id == r.Id); Throws(() => AppFiles.SaveReport(dir, r)); }));
+Test("system appearance follows light apps preference", () => Check(ThemePolicy.Resolve(ThemeMode.System, true, false) == ThemeVariant.Light));
+Test("system appearance follows dark apps preference", () => Check(ThemePolicy.Resolve(ThemeMode.System, false, false) == ThemeVariant.Dark));
+Test("manual light overrides dark system", () => Check(ThemePolicy.Resolve(ThemeMode.Light, false, false) == ThemeVariant.Light));
+Test("manual dark overrides light system", () => Check(ThemePolicy.Resolve(ThemeMode.Dark, true, false) == ThemeVariant.Dark));
+Test("high contrast overrides every appearance preference", () => { foreach (var mode in Enum.GetValues<ThemeMode>()) Check(ThemePolicy.Resolve(mode, true, true) == ThemeVariant.HighContrast); });
+Test("unknown stored theme normalizes to system", () => Check(ThemePolicy.Normalize((ThemeMode)99) == ThemeMode.System && ThemePolicy.Resolve((ThemeMode)99, false, false) == ThemeVariant.Dark));
 Console.WriteLine($"{passed} passed; {failed} failed");
 return failed == 0 ? 0 : 1;

@@ -15,6 +15,7 @@ jobs:
         with:
           dotnet-version: '8.0.x'
       - run: dotnet run --project tests/GuideDeck.Tests -c Release
+      - run: python3 scripts/check-theme-contrast.py
   windows:
     runs-on: windows-2022
     steps:
@@ -32,6 +33,12 @@ jobs:
       - name: Single-file companion startup smoke test
         shell: powershell
         run: ./scripts/smoke-desktop.ps1 -Executable src/GuideDeck.GameBar/Companion/GuideDeck.exe
+      - name: Render light and dark UI previews
+        shell: powershell
+        run: ./scripts/capture-ui.ps1
+      - name: Verify live system theme updates
+        shell: powershell
+        run: ./scripts/test-system-theme.ps1
       - name: Installer offline smoke test
         shell: powershell
         run: |
@@ -52,4 +59,11 @@ jobs:
             artifacts/GuideDeck-windows-x64.zip
             artifacts/SHA256SUMS.txt
             src/GuideDeck.GameBar/AppPackages/**
+          if-no-files-found: warn
+      - name: Upload actual UI renders
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: GuideDeck-ui-previews
+          path: artifacts/ui-previews/
           if-no-files-found: warn

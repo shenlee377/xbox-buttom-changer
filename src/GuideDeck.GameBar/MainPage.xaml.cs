@@ -18,12 +18,17 @@ namespace GuideDeck.GameBar
         private readonly DispatcherTimer timer = new DispatcherTimer {Interval = TimeSpan.FromSeconds(5)};
         private XboxGameBarWidget host;
         private bool refreshing, copying;
+        private bool updatingAppearance = true;
+        private ThemeMode appearance = ThemeMode.System;
+        private int appearanceRevision;
+        private readonly Windows.UI.ViewManagement.AccessibilitySettings accessibility = new Windows.UI.ViewManagement.AccessibilitySettings();
+        private readonly Windows.UI.ViewManagement.UISettings systemUi = new Windows.UI.ViewManagement.UISettings();
         private readonly List<ComboBox> results = new List<ComboBox>();
         private readonly IReadOnlyList<string> criteria = ValidationContract.Labels;
         public MainPage()
         {
             InitializeComponent();
-            timer.Tick += async (sender, args) => await ReadSummary();
+            timer.Tick += async (sender, args) => { await ReadAppearance(); await ReadSummary(); };
             Unloaded += (sender, args) => StopMonitor();
             foreach (var criterion in criteria)
             {
@@ -33,6 +38,7 @@ namespace GuideDeck.GameBar
             Game.TextChanged += (sender, args) => ClearObservations();
             Context.TextChanged += (sender, args) => ClearObservations();
             Scope.SelectionChanged += (sender, args) => ClearObservations();
+            ApplyAppearance();
         }
         private void ClearObservations() { foreach (var result in results) result.SelectedIndex = 0; }
         public void OpenSettings() { Sections.SelectedIndex = 1; }
@@ -40,9 +46,57 @@ namespace GuideDeck.GameBar
         {
             base.OnNavigatedTo(e);
             host = e.Parameter as XboxGameBarWidget;
-            if (host != null) host.VisibleChanged += HostVisibleChanged;
+            if (host != null) { host.VisibleChanged += HostVisibleChanged; host.RequestedThemeChanged += HostThemeChanged; }
+            accessibility.HighContrastChanged += HighContrastChanged;
+            systemUi.ColorValuesChanged += SystemColorsChanged;
+            ApplyAppearance();
+            _ = ReadAppearance();
             UpdateTimer();
         }
+        private async void HostThemeChanged(XboxGameBarWidget sender, object args) => await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, ApplyAppearance);
+        private async void HighContrastChanged(Windows.UI.ViewManagement.AccessibilitySettings sender, object args) => await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, ApplyAppearance);
+        private async void SystemColorsChanged(Windows.UI.ViewManagement.UISettings sender, object args) => await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, ApplyAppearance);
+        private void ApplyAppearance()
+        {
+            var background = systemUi.GetColorValue(Windows.UI.ViewManagement.UIColorType.Background);
+            bool light = background.R * 299 + background.G * 587 + background.B * 114 >= 128000;
+            var variant = ThemePolicy.Resolve(appearance, light, accessibility.HighContrast);
+            RequestedTheme = variant == ThemeVariant.HighContrast ? ElementTheme.Default :
+                appearance == ThemeMode.System && host != null && host.RequestedTheme != ElementTheme.Default ? host.RequestedTheme :
+                variant == ThemeVariant.Light ? ElementTheme.Light : ElementTheme.Dark;
+            updatingAppearance = true;
+            AppearanceChoice.SelectedIndex = (int)appearance;
+            updatingAppearance = false;
+        }
+        private async Task ReadAppearance()
+        {
+            int revision = appearanceRevision;
+            try
+            {
+                var folder = await ApplicationData.Current.LocalFolder.GetFolderAsync("GuideDeck");
+                var file = await folder.GetFileAsync("appearance.json");
+                if ((await file.GetBasicPropertiesAsync()).Size > 4096) return;
+                var data = JsonObject.Parse(await FileIO.ReadTextAsync(file));
+                if (!Enum.TryParse(data.GetNamedString("Mode", "System"), out ThemeMode mode)) mode = ThemeMode.System;
+                mode = ThemePolicy.Normalize(mode);
+                if (revision == appearanceRevision && appearance != mode) { appearance = mode; ApplyAppearance(); }
+            }
+            catch { /* Keep the current valid theme if the file is absent or temporarily unavailable. */ }
+        }
+        private async void AppearanceChanged(object sender, SelectionChangedEventArgs args) => await Run(async () =>
+        {
+            if (updatingAppearance || AppearanceChoice.SelectedIndex < 0) return;
+            appearance = ThemePolicy.Normalize((ThemeMode)AppearanceChoice.SelectedIndex);
+            appearanceRevision++;
+            var selected = appearance;
+            ApplyAppearance();
+            var folder = await ApplicationData.Current.LocalFolder.CreateFolderAsync("GuideDeck", CreationCollisionOption.OpenIfExists);
+            var temp = await folder.CreateFileAsync("appearance-" + Guid.NewGuid() + ".tmp");
+            try {
+                await FileIO.WriteTextAsync(temp, new JsonObject {{"Mode", JsonValue.CreateStringValue(selected.ToString())}}.Stringify());
+                await temp.RenameAsync("appearance.json", NameCollisionOption.ReplaceExisting);
+            } catch { await temp.DeleteAsync(); throw; }
+        });
         private async void HostVisibleChanged(XboxGameBarWidget sender, object args)
         {
             await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, UpdateTimer);
@@ -54,7 +108,9 @@ namespace GuideDeck.GameBar
         public void StopMonitor()
         {
             timer.Stop();
-            if (host != null) host.VisibleChanged -= HostVisibleChanged;
+            if (host != null) { host.VisibleChanged -= HostVisibleChanged; host.RequestedThemeChanged -= HostThemeChanged; }
+            accessibility.HighContrastChanged -= HighContrastChanged;
+            systemUi.ColorValuesChanged -= SystemColorsChanged;
             host = null;
         }
         private async void OpenManager(object sender, RoutedEventArgs e) => await Run(async () =>

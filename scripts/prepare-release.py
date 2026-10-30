@@ -6,6 +6,7 @@ import re
 import subprocess
 import sys
 import zipfile
+from xml.etree import ElementTree as ET
 
 
 def prepare(source: Path, output: Path, sha: str, run_id: str, version: str) -> None:
@@ -24,6 +25,10 @@ def prepare(source: Path, output: Path, sha: str, run_id: str, version: str) -> 
         raise ValueError("Expected one Game Bar package")
     package = packages[0]
     with zipfile.ZipFile(package) as archive:
+        manifest = ET.fromstring(archive.read('AppxManifest.xml'))
+        identity = manifest.find('{http://schemas.microsoft.com/appx/manifest/foundation/windows10}Identity')
+        if identity is None or '.'.join(identity.attrib['Version'].split('.')[:3]) != version[1:]:
+            raise ValueError('Release version does not match the tested package')
         executable = archive.read("Companion/GuideDeck.exe")
         if executable[:2] != b"MZ":
             raise ValueError("Invalid companion executable")
@@ -43,6 +48,8 @@ def prepare(source: Path, output: Path, sha: str, run_id: str, version: str) -> 
         # Scripts must come from the tested commit, not the controller workflow commit.
         content = subprocess.run(["git", "show", f"{sha}:scripts/{script}"], check=True, capture_output=True).stdout
         (output / script).write_bytes(content)
+    changes = subprocess.run(['git', 'show', f'{sha}:docs/releases/{version}.txt'], capture_output=True)
+    features = changes.stdout.decode('utf-8') if changes.returncode == 0 else 'mapping 局部備份／還原、設定漂移檢查、驗收歷史與匯出、Game Bar 同套件管理器入口與狀態摘要。'
     names = ("GuideDeck.exe", "GuideDeck-windows-x64.zip", "GuideDeck-GameBar-development.zip", "Install-GuideDeck.ps1", "Uninstall-GuideDeck.ps1", "GuideDeck-LICENSES.txt")
     (output / "SHA256SUMS.txt").write_text("\n".join(hashlib.sha256((output / name).read_bytes()).hexdigest() + "  " + name for name in names) + "\n")
     (output / "NOTES.txt").write_text(f"""GuideDeck {version} 實驗版
@@ -58,10 +65,10 @@ def prepare(source: Path, output: Path, sha: str, run_id: str, version: str) -> 
 
 安裝指令：.\\Install-GuideDeck.ps1 -Version {version}
 
-改進：mapping 局部備份／還原、設定漂移檢查、驗收歷史與匯出、Game Bar 同套件管理器入口與狀態摘要。
+{features}
 不修改 Game Bar、Steam Input 或整體 Overlay 的啟用開關。
 
-驗證：54 項核心測試、Windows 桌面與 UWP 建置、一般／單檔版啟動與單一實例、安裝／更新／校驗拒絕／移除。
+驗證：核心回歸測試、Windows 桌面與 UWP 建置、一般／單檔版啟動與單一實例、安裝／更新／校驗拒絕／移除。
 產物來自已成功的 CI：https://github.com/shenlee377/xbox-buttom-changer/actions/runs/{run_id}
 測試來源 commit：{sha}
 

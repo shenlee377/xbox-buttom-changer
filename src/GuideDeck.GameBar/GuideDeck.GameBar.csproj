@@ -16,6 +16,7 @@
   <Compile Include="MainPage.xaml.cs"><DependentUpon>MainPage.xaml</DependentUpon></Compile>
   <Compile Include="..\GuideDeck.Core\Mapping.cs"><Link>Shared\Mapping.cs</Link></Compile>
   <Compile Include="..\GuideDeck.Core\ValidationContract.cs"><Link>Shared\ValidationContract.cs</Link></Compile>
+  <Compile Include="..\GuideDeck.Core\ThemePolicy.cs"><Link>Shared\ThemePolicy.cs</Link></Compile>
   <AppxManifest Include="Package.appxmanifest"/>
   <Content Include="Assets\*.png"/>
   <Content Include="GameBar\Readme.txt"/>
