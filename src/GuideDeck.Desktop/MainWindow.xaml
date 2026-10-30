@@ -25,7 +25,7 @@
       <TextBlock Text="只移除所選控制器的 Guide 欄位，保留其他按鍵與對應順序。" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" Margin="0,0,0,12"/>
       <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="16"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
        <StackPanel><TextBlock Text="目前設定" Margin="0,0,0,6"/><TextBox x:Name="Before" Height="112" IsReadOnly="True" FontFamily="Consolas" FontSize="12" AutomationProperties.Name="修改前 mapping"/></StackPanel>
-       <StackPanel Grid.Column="2"><TextBlock Text="移除 Guide 後" Foreground="{DynamicResource AccentSoftTextBrush}" Margin="0,0,0,6"/><TextBox x:Name="After" Height="112" IsReadOnly="True" FontFamily="Consolas" FontSize="12" AutomationProperties.Name="修改後 mapping"/></StackPanel>
+       <StackPanel Grid.Column="2"><TextBlock Text="移除 Guide 後" Foreground="{DynamicResource TextBrush}" Margin="0,0,0,6"/><TextBox x:Name="After" Height="112" IsReadOnly="True" FontFamily="Consolas" FontSize="12" AutomationProperties.Name="修改後 mapping"/></StackPanel>
       </Grid>
      </StackPanel></Border>
     </StackPanel></ScrollViewer>

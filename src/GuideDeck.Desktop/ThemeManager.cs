@@ -89,9 +89,9 @@ public sealed class ThemeManager : IDisposable
     private static ResourceDictionary HighContrastPalette()
     {
         var result = new ResourceDictionary();
-        foreach (var name in new[] {"AppBackgroundBrush", "SurfaceBrush", "InputBrush", "NoticeBrush"}) result[name] = new SolidColorBrush(SystemColors.WindowColor);
+        foreach (var name in new[] {"AppBackgroundBrush", "SurfaceBrush", "InputBrush", "NoticeBrush", "HoverBrush"}) result[name] = new SolidColorBrush(SystemColors.WindowColor);
         foreach (var name in new[] {"TextBrush", "MutedTextBrush", "NoticeTextBrush", "BorderBrush", "ControlBorderBrush"}) result[name] = new SolidColorBrush(SystemColors.WindowTextColor);
-        foreach (var name in new[] {"AccentBrush", "AccentSoftBrush", "HoverBrush"}) result[name] = new SolidColorBrush(SystemColors.HighlightColor);
+        foreach (var name in new[] {"AccentBrush", "AccentSoftBrush"}) result[name] = new SolidColorBrush(SystemColors.HighlightColor);
         foreach (var name in new[] {"AccentTextBrush", "AccentSoftTextBrush"}) result[name] = new SolidColorBrush(SystemColors.HighlightTextColor);
         return result;
     }

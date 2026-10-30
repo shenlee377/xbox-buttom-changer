@@ -11,7 +11,7 @@ try {
         if (Test-Path $errorFile) { Get-Content $errorFile }
         throw 'UI capture failed.'
     }
-    foreach ($theme in @('light','dark')) {
+    foreach ($theme in @('light','dark','light-compact','dark-compact')) {
         $file = Join-Path $output "desktop-$theme.png"
         if (-not (Test-Path $file) -or (Get-Item $file).Length -lt 1000) { throw "Missing rendered preview: $theme" }
     }
