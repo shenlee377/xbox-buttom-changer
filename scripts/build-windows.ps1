@@ -25,8 +25,13 @@ try {
     if ($IncludeGameBar) {
         $companion = Join-Path $repo 'src/GuideDeck.GameBar/Companion'
         if (Test-Path $companion) { Remove-Item $companion -Recurse -Force }
-        New-Item -ItemType Directory -Path $companion | Out-Null
-        Copy-Item artifacts/windows-x64/* $companion -Recurse
+        # UWP's old resource harvester must not inspect modern .NET/WPF managed DLLs.
+        # Bundle the full-trust companion using the supported .NET single-file format.
+        dotnet publish src/GuideDeck.Desktop -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o $companion
+        if ($LASTEXITCODE -ne 0) { throw 'Single-file desktop companion publish failed.' }
+        Copy-Item README.txt $companion/README.txt
+        Copy-Item LICENSE $companion/LICENSE
+        Get-ChildItem artifacts/windows-x64 -File | Where-Object { $_.Name -match 'license|notice' } | Copy-Item -Destination $companion
         $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio/Installer/vswhere.exe'
         if (-not (Test-Path $vswhere)) { throw 'Visual Studio MSBuild with UWP tools is required.' }
         $msbuild = & $vswhere -latest -products '*' -requires Microsoft.Component.MSBuild -find 'MSBuild\**\Bin\MSBuild.exe' | Select-Object -First 1

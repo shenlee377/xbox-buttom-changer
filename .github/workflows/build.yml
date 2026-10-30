@@ -29,6 +29,9 @@ jobs:
       - name: Desktop startup smoke test
         shell: powershell
         run: ./scripts/smoke-desktop.ps1
+      - name: Single-file companion startup smoke test
+        shell: powershell
+        run: ./scripts/smoke-desktop.ps1 -Executable src/GuideDeck.GameBar/Companion/GuideDeck.exe
       - name: Installer offline smoke test
         shell: powershell
         run: |
