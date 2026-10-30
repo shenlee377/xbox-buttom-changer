@@ -18,7 +18,7 @@
  </ResourceDictionary></Page.Resources>
  <Grid Padding="16"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
   <Grid Margin="0,0,0,10"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="170"/></Grid.ColumnDefinitions>
-   <StackPanel VerticalAlignment="Center"><TextBlock Text="GuideDeck" FontSize="25" FontWeight="SemiBold"/><TextBlock Text="Xbox 按鈕管理" Foreground="{ThemeResource WidgetMutedBrush}" FontSize="12" Margin="0,4,0,0"/></StackPanel>
+   <StackPanel Orientation="Horizontal" VerticalAlignment="Center"><Image Source="Assets/Square44x44Logo.png" Width="36" Height="36" Margin="0,0,10,0" VerticalAlignment="Center"/><StackPanel><TextBlock Text="GuideDeck" FontSize="25" FontWeight="SemiBold"/><TextBlock Text="Xbox 按鈕管理" Foreground="{ThemeResource WidgetMutedBrush}" FontSize="12" Margin="0,4,0,0"/></StackPanel></StackPanel>
    <ComboBox x:Name="AppearanceChoice" Grid.Column="1" Header="外觀" HorizontalAlignment="Stretch" AutomationProperties.Name="外觀模式" SelectionChanged="AppearanceChanged"><ComboBoxItem Content="跟隨系統／Game Bar"/><ComboBoxItem Content="淺色"/><ComboBoxItem Content="深色"/></ComboBox>
   </Grid>
   <Pivot x:Name="Sections" Grid.Row="1">

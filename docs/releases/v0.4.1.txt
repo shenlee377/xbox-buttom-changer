@@ -1,0 +1,7 @@
+原創手把圖標：
+- 以手把輪廓與中央亮色 Guide 鈕為主題，採用與介面一致的薄荷綠與深綠配色。
+- 桌面 EXE、視窗圖示、標頭與 Game Bar 套件圖示統一更新。
+- 提供多尺寸 ICO、Game Bar 高 DPI 素材，以及可編輯 SVG／1024 PNG。
+- Release 附上 GuideDeck-icons.zip，可單獨下載圖標素材。
+
+Steam Guide 設定處理沿用 0.4.0；這次更新集中在圖標與品牌素材。

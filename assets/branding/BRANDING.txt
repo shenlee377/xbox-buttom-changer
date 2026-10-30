@@ -1,0 +1,28 @@
+GuideDeck controller icon — 2026-10-30
+
+The production artwork is GuideDeck.svg. It uses a recognizable controller
+silhouette, asymmetric sticks, D-pad and four action buttons. An enlarged
+ivory Guide button identifies the control this app manages.
+
+Palette:
+  Evergreen tile / controls: #14251D
+  Mint controller:          #85DDA8
+  Ivory Guide button:       #F5F7F2
+Transparent outside the rounded tile. The same mark works on light and dark
+surfaces; system appearance changes do not recolor the brand artwork.
+
+GuideDeck.png: 1024 x 1024 master raster exported from the SVG.
+GuideDeck.ico: 16, 20, 24, 32, 48, 64, 128, 256 pixel Windows icon frames.
+Game Bar assets include tile, store, splash, 200/400-percent scale variants
+and unplated target-size icons. Desktop EXE/window and both app headers use
+this artwork. The 16px frame keeps the same silhouette; small controls are
+primarily useful at larger sizes.
+
+Regenerate committed raster/ICO assets with scripts/export-icons.sh
+(Inkscape and ImageMagick 7 required only for exporting artwork, not building
+or running the app). Windows packaging is verified by the normal CI.
+
+The vector artwork is original GuideDeck project artwork under the repository
+MIT license. Generated visual concepts informed the direction; production
+assets are rendered from the editable geometric SVG. No Xbox X sphere or
+Steam arm logo is included. The graphic does not imply vendor affiliation.

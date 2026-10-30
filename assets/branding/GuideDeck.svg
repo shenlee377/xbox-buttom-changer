@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">GuideDeck controller icon</title>
+  <desc id="desc">A mint green game controller with an ivory Guide button, on a dark evergreen rounded tile.</desc>
+  <rect x="8" y="8" width="496" height="496" rx="100" fill="#14251D"/>
+  <path fill="#85DDA8" d="M164 134C147 120 126 127 103 136C77 146 67 165 59 198L38 321C28 366 40 398 70 410C91 419 111 405 134 380L179 337C190 326 203 322 219 322H292C307 322 320 327 331 338L378 384C400 409 420 419 441 407C468 393 479 366 470 325L450 199C443 167 432 147 407 138C385 130 366 122 350 135L335 147C327 154 318 157 307 157H203C188 157 177 146 164 134Z"/>
+  <g fill="#14251D">
+    <circle cx="142" cy="219" r="28"/>
+    <circle cx="325" cy="282" r="28"/>
+    <path d="M179 254H197V273H216V291H197V310H179V291H160V273H179Z"/>
+    <circle cx="371" cy="182" r="12"/><circle cx="398" cy="209" r="12"/>
+    <circle cx="371" cy="236" r="12"/><circle cx="344" cy="209" r="12"/>
+    <circle cx="256" cy="202" r="39"/>
+  </g>
+  <circle cx="256" cy="202" r="25" fill="#F5F7F2"/>
+</svg>

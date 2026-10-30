@@ -38,6 +38,16 @@ def prepare(source: Path, output: Path, sha: str, run_id: str, version: str) -> 
         for dependency in (package.parent / "Dependencies/x64").glob("*.appx"):
             archive.write(dependency, "Dependencies/x64/" + dependency.name)
         archive.writestr("README.txt", "Unsigned Game Bar development MSIX, not a normal end-user installer.\nUse Visual Studio developer deployment or your own approved signing process.\nNo certificate or private key is included. Hardware/game behavior is unverified.\n")
+    with zipfile.ZipFile(output / "GuideDeck-icons.zip", "w", zipfile.ZIP_DEFLATED) as archive:
+        for source_name, target_name in (
+            ("assets/branding/GuideDeck.svg", "GuideDeck.svg"),
+            ("assets/branding/GuideDeck.png", "GuideDeck.png"),
+            ("assets/branding/BRANDING.txt", "BRANDING.txt"),
+            ("src/GuideDeck.Desktop/Assets/GuideDeck.ico", "GuideDeck.ico"),
+            ("LICENSE", "LICENSE"),
+        ):
+            content = subprocess.run(["git", "show", f"{sha}:{source_name}"], check=True, capture_output=True).stdout
+            archive.writestr(target_name, content)
     notices = []
     with zipfile.ZipFile(io.BytesIO(data)) as archive:
         for name in sorted(archive.namelist()):
@@ -50,7 +60,7 @@ def prepare(source: Path, output: Path, sha: str, run_id: str, version: str) -> 
         (output / script).write_bytes(content)
     changes = subprocess.run(['git', 'show', f'{sha}:docs/releases/{version}.txt'], capture_output=True)
     features = changes.stdout.decode('utf-8') if changes.returncode == 0 else 'mapping 局部備份／還原、設定漂移檢查、驗收歷史與匯出、Game Bar 同套件管理器入口與狀態摘要。'
-    names = ("GuideDeck.exe", "GuideDeck-windows-x64.zip", "GuideDeck-GameBar-development.zip", "Install-GuideDeck.ps1", "Uninstall-GuideDeck.ps1", "GuideDeck-LICENSES.txt")
+    names = ("GuideDeck.exe", "GuideDeck-windows-x64.zip", "GuideDeck-GameBar-development.zip", "Install-GuideDeck.ps1", "Uninstall-GuideDeck.ps1", "GuideDeck-LICENSES.txt", "GuideDeck-icons.zip")
     (output / "SHA256SUMS.txt").write_text("\n".join(hashlib.sha256((output / name).read_bytes()).hexdigest() + "  " + name for name in names) + "\n")
     (output / "NOTES.txt").write_text(f"""GuideDeck {version} 實驗版
 
@@ -61,6 +71,7 @@ def prepare(source: Path, output: Path, sha: str, run_id: str, version: str) -> 
 - GuideDeck-windows-x64.zip：較小的免安裝壓縮包，內含 .NET runtime。
 - Install-GuideDeck.ps1／Uninstall-GuideDeck.ps1：目前使用者的安裝／移除腳本。
 - SHA256SUMS.txt／GuideDeck-LICENSES.txt：校驗與授權聲明。
+- GuideDeck-icons.zip：手把圖標的 SVG／PNG／ICO 原始素材。
 - GuideDeck-GameBar-development.zip：未簽章開發 MSIX 與 x64 相依套件，不是一般使用者安裝包。
 
 安裝指令：.\\Install-GuideDeck.ps1 -Version {version}

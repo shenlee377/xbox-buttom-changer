@@ -1,4 +1,4 @@
-GuideDeck 0.4 — Xbox Button Changer
+GuideDeck 0.4.1 — Xbox Button Changer
 2026-10-30
 ============================================================
 
@@ -33,9 +33,9 @@ https://github.com/shenlee377/xbox-buttom-changer/releases
 
 安裝腳本：下載並檢視 Install-GuideDeck.ps1，依自己的 PowerShell
 執行原則執行：
-  .\Install-GuideDeck.ps1 -Version v0.4.0
+  .\Install-GuideDeck.ps1 -Version v0.4.1
   # 選配：安裝後開啟
-  .\Install-GuideDeck.ps1 -Version v0.4.0 -Launch
+  .\Install-GuideDeck.ps1 -Version v0.4.1 -Launch
 
 腳本會下載指定 Release 的 ZIP 與 SHA256SUMS.txt、驗證完整性，安裝至
 %LOCALAPPDATA%\Programs\GuideDeck 並建立開始功能表捷徑。SHA-256 核對
@@ -169,3 +169,6 @@ Game Bar 自動模式尊重宿主 RequestedTheme；同套件桌面與 widget 共
 偏好並在執行中更新。一般程式不修改 Windows 的主題登錄值。
 CI 另檢查主題色對比、實際 WPF 深淺色渲染與即時系統設定變更。
 詳細設計：docs/UI-DESIGN.txt。
+
+圖標：GuideDeck-icons.zip 提供原創手把 SVG／1024 PNG／多尺寸 Windows ICO。
+以中央亮色 Guide 鈕為辨識重點，深淺色使用同一圖標，素材授權沿用 MIT。

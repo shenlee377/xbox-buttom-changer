@@ -4,15 +4,15 @@
  xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
  xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities" IgnorableNamespaces="uap uap3 desktop rescap">
- <Identity Name="GuideDeck.Prototype" Publisher="CN=GuideDeckDevelopment" Version="0.4.0.0" ProcessorArchitecture="x64"/>
+ <Identity Name="GuideDeck.Prototype" Publisher="CN=GuideDeckDevelopment" Version="0.4.1.0" ProcessorArchitecture="x64"/>
  <Properties><DisplayName>GuideDeck Prototype</DisplayName><PublisherDisplayName>GuideDeck Development</PublisherDisplayName><Logo>Assets\StoreLogo.png</Logo></Properties>
  <Dependencies><TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.19041.0" MaxVersionTested="10.0.19041.0"/></Dependencies>
  <Resources><Resource Language="zh-TW"/><Resource Language="en-US"/></Resources>
  <Applications><Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="GuideDeck.GameBar.App">
-  <uap:VisualElements DisplayName="GuideDeck" Description="Steam Guide mapping experimental workbench" BackgroundColor="#111A15" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png">
+  <uap:VisualElements DisplayName="GuideDeck" Description="Steam Guide settings and controller management" BackgroundColor="#14251D" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png">
    <uap:SplashScreen Image="Assets\SplashScreen.png"/>
   </uap:VisualElements>
-  <Extensions><uap3:Extension Category="windows.appExtension"><uap3:AppExtension Name="microsoft.gameBarUIExtension" Id="GuideDeck" DisplayName="GuideDeck" Description="Steam Guide mapping workbench" PublicFolder="GameBar"><uap3:Properties>
+  <Extensions><uap3:Extension Category="windows.appExtension"><uap3:AppExtension Name="microsoft.gameBarUIExtension" Id="GuideDeck" DisplayName="GuideDeck" Description="Steam Guide settings and controller management" PublicFolder="GameBar"><uap3:Properties>
    <GameBarWidget Type="Standard"><HomeMenuVisible>true</HomeMenuVisible><PinningSupported>false</PinningSupported><Window><Size><Width>520</Width><Height>700</Height><MinWidth>400</MinWidth><MinHeight>450</MinHeight><MaxWidth>1000</MaxWidth><MaxHeight>1000</MaxHeight></Size><ResizeSupported><Horizontal>true</Horizontal><Vertical>true</Vertical></ResizeSupported></Window></GameBarWidget>
   </uap3:Properties></uap3:AppExtension></uap3:Extension>
    <desktop:Extension Category="windows.fullTrustProcess" Executable="Companion\GuideDeck.exe"><desktop:FullTrustProcess/></desktop:Extension>
