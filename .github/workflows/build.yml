@@ -1,0 +1,46 @@
+name: Build and verify
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - run: dotnet run --project tests/GuideDeck.Tests -c Release
+  windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - uses: microsoft/setup-msbuild@v2
+      - name: Build desktop and Game Bar companion package
+        shell: powershell
+        run: ./scripts/build-windows.ps1 -IncludeGameBar
+      - name: Desktop startup smoke test
+        shell: powershell
+        run: ./scripts/smoke-desktop.ps1
+      - name: Installer offline smoke test
+        shell: powershell
+        run: |
+          ./scripts/Install-GuideDeck.ps1 -ArchivePath artifacts/GuideDeck-windows-x64.zip -ChecksumFile artifacts/SHA256SUMS.txt -SkipShortcut
+          ./scripts/Uninstall-GuideDeck.ps1
+      - name: Upload Windows build output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: GuideDeck-windows
+          path: |
+            artifacts/GuideDeck-windows-x64.zip
+            artifacts/SHA256SUMS.txt
+            src/GuideDeck.GameBar/AppPackages/**
+          if-no-files-found: warn

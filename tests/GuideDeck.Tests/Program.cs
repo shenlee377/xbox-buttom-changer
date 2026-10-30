@@ -84,18 +84,83 @@ Test("late Steam launch aborts write and keeps recovery receipt", () => WithConf
     Throws(() => ConfigTransaction.Apply(preview, Path.Combine(dir, "backup"), () => { if (++guards == 2) throw new Exception("Steam started"); }));
     Check(File.ReadAllBytes(path).SequenceEqual(Config())); Check(Directory.GetFiles(Path.Combine(dir, "backup")).Length == 1); Check(Directory.GetFiles(dir, "*.tmp").Length == 0);
 }));
-Test("restore refuses subsequent Steam/user changes", () => WithConfig((path, dir) => {
+Test("restore preserves unrelated subsequent Steam/user changes", () => WithConfig((path, dir) => {
     var receipt = ConfigTransaction.Apply(ConfigTransaction.Preview(path, 0), dir, () => {}); File.AppendAllText(path, "// later setting");
-    var current = File.ReadAllBytes(path); Throws(() => ConfigTransaction.Restore(receipt, () => {})); Check(File.ReadAllBytes(path).SequenceEqual(current));
+    ConfigTransaction.Restore(receipt, () => {}); Check(File.ReadAllBytes(path).SequenceEqual(Config().Concat(Encoding.UTF8.GetBytes("// later setting"))));
 }));
 Test("tampered backup is rejected", () => WithConfig((path, dir) => {
     var receipt = ConfigTransaction.Apply(ConfigTransaction.Preview(path, 0), dir, () => {});
-    var record = JsonSerializer.Deserialize<BackupReceipt>(File.ReadAllText(receipt))!;
-    File.WriteAllText(receipt, JsonSerializer.Serialize(record with {OriginalHash = "bad"})); Throws(() => ConfigTransaction.Restore(receipt, () => {}));
+    var record = JsonSerializer.Deserialize<MappingBackup>(File.ReadAllText(receipt))!;
+    File.WriteAllText(receipt, JsonSerializer.Serialize(record with {BeforeMappingHash = "bad"})); Throws(() => ConfigTransaction.Restore(receipt, () => {}));
 }));
 Test("cooperating operations cannot overlap", () => WithConfig((path, dir) => {
     using var locked = new FileStream(path + ".guidedeck.lock", FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
     Throws(() => ConfigTransaction.Apply(ConfigTransaction.Preview(path, 0), dir, () => {}));
 }));
+Test("duplicate root container rejected", () => Check(SteamConfig.Inspect(Config().Concat(Encoding.UTF8.GetBytes("\"InstallConfigStore\" {} ")).ToArray()).Problems.Count > 0));
+Test("object/string target collision rejected", () => {
+    var text = Encoding.UTF8.GetString(Config()).Replace("\"SDL_GamepadBind\"", "\"SDL_GamepadBind\" {} \"SDL_GamepadBind\"");
+    Check(SteamConfig.Inspect(Encoding.UTF8.GetBytes(text)).Problems.Count > 0);
+});
+Test("duplicate ordinary binding rejected", () => Throws(() => MappingEditor.RemoveGuide(line + "a:b9,")));
+Test("CRC case normalized", () => Check(MappingEditor.RemoveGuide(line.Replace("085d", "085D")).Identity == MappingEditor.RemoveGuide(line).Identity));
+Test("invalid CRC rejected", () => Throws(() => MappingEditor.RemoveGuide(line.Replace("crc:085d", "crc:../x"))));
+Test("new receipt contains selected mapping only", () => WithConfig((path, dir) => {
+    File.AppendAllText(path, "\n// private config fixture: not-a-real-secret");
+    var receipt = ConfigTransaction.Apply(ConfigTransaction.Preview(path, 0), dir, () => {});
+    var raw = File.ReadAllText(receipt); Check(!raw.Contains("not-a-real-secret")); Check(!raw.Contains("OriginalBase64"));
+    Check(JsonSerializer.Deserialize<MappingBackup>(raw)!.SchemaVersion == 2);
+}));
+Test("legacy v1 receipt remains restorable without overwriting unrelated settings", () => WithConfig((path, dir) => {
+    var original = Config(); var modified = SteamConfig.Patch(original, 0);
+    var receipt = new BackupReceipt(1, path, ConfigTransaction.Hash(original), ConfigTransaction.Hash(modified), 0,
+        MappingEditor.RemoveGuide(line).Identity, DateTimeOffset.UtcNow, Convert.ToBase64String(original));
+    var file = Path.Combine(dir, "old.backup.json"); File.WriteAllText(file, JsonSerializer.Serialize(receipt));
+    File.WriteAllBytes(path, modified.Concat(Encoding.UTF8.GetBytes("// newer preference")).ToArray());
+    ConfigTransaction.Restore(file, () => {});
+    Check(File.ReadAllBytes(path).SequenceEqual(original.Concat(Encoding.UTF8.GetBytes("// newer preference"))));
+}));
+Test("restore follows identity when controller lines reorder", () => WithConfig((path, dir) => {
+    var second = line.Replace("crc:085d", "crc:1111"); File.WriteAllBytes(path, Config(line + "\n" + second));
+    var receipt = ConfigTransaction.Apply(ConfigTransaction.Preview(path, 0), dir, () => {});
+    File.WriteAllBytes(path, Config(second + "\n" + line.Replace("guide:b5,", "")));
+    ConfigTransaction.Restore(receipt, () => {}); Check(File.ReadAllBytes(path).SequenceEqual(Config(second + "\n" + line)));
+}));
+Test("restore refuses modified normal buttons on same controller", () => WithConfig((path, dir) => {
+    var receipt = ConfigTransaction.Apply(ConfigTransaction.Preview(path, 0), dir, () => {});
+    File.WriteAllText(path, File.ReadAllText(path).Replace("a:b0", "a:b9")); var current = File.ReadAllBytes(path);
+    Throws(() => ConfigTransaction.Restore(receipt, () => {})); Check(File.ReadAllBytes(path).SequenceEqual(current));
+}));
+Test("restore does not recreate a missing controller", () => WithConfig((path, dir) => {
+    var receipt = ConfigTransaction.Apply(ConfigTransaction.Preview(path, 0), dir, () => {});
+    File.WriteAllBytes(path, Config(line.Replace("crc:085d", "crc:1111"))); Throws(() => ConfigTransaction.Restore(receipt, () => {}));
+}));
+Test("restore is idempotent", () => WithConfig((path, dir) => {
+    var receipt = ConfigTransaction.Apply(ConfigTransaction.Preview(path, 0), dir, () => {});
+    ConfigTransaction.Restore(receipt, () => {}); Check(ConfigTransaction.PreviewRestore(receipt).AlreadyRestored);
+    ConfigTransaction.Restore(receipt, () => {}); Check(File.ReadAllBytes(path).SequenceEqual(Config()));
+}));
+Test("stale restore preview rejected", () => WithConfig((path, dir) => {
+    var receipt = ConfigTransaction.Apply(ConfigTransaction.Preview(path, 0), dir, () => {});
+    var plan = ConfigTransaction.PreviewRestore(receipt); File.AppendAllText(path, "// changed after preview");
+    Throws(() => ConfigTransaction.Restore(plan, () => {}));
+}));
+Test("restore preview detects receipt modification", () => WithConfig((path, dir) => {
+    var receipt = ConfigTransaction.Apply(ConfigTransaction.Preview(path, 0), dir, () => {});
+    var plan = ConfigTransaction.PreviewRestore(receipt); File.AppendAllText(receipt, " ");
+    Throws(() => ConfigTransaction.Restore(plan, () => {}));
+}));
+ValidationReport Report() => new(2, Guid.NewGuid(), DateTimeOffset.UtcNow, "Game", "Xbox USB; Steam test-build", TestScope.SteamGame,
+    "test OS", "config-hash", "identity", "mapping-hash", ValidationRules.Keys.ToDictionary(k => k, _ => Observation.Passed), "");
+Test("manual report pass limited to exact config", () => Check(ValidationRules.Evaluate(Report(), "config-hash") == "此情境人工驗收通過"));
+Test("changed config marks reports stale", () => Check(ValidationRules.Evaluate(Report(), "new-hash") == "設定已變更，需重測"));
+Test("unbound mapping cannot produce pass", () => Check(ValidationRules.Evaluate(Report() with {MappingHash = null}, "config-hash") == "未綁定設定，僅供參考"));
+Test("unknown observation cannot produce pass", () => { var r = Report(); r.Results.ToDictionary(); var d = new Dictionary<string, Observation>(r.Results) {["haptics"] = Observation.Untested}; Check(ValidationRules.Evaluate(r with {Results = d}, "config-hash") == "此情境尚未測完"); });
+Test("failure takes precedence over incomplete", () => { var r = Report(); var d = new Dictionary<string, Observation>(r.Results) {["gamebar"] = Observation.Failed, ["haptics"] = Observation.Untested}; Check(ValidationRules.Evaluate(r with {Results = d}, "config-hash") == "此情境有失敗項目"); });
+Test("Steam overlay checks cannot be skipped in Steam game", () => { var r = Report(); var d = new Dictionary<string, Observation>(r.Results) {["overlay-shortcut"] = Observation.NotApplicable}; Throws(() => ValidationRules.Validate(r with {Results = d, Notes = "skip"})); });
+Test("desktop overlay check may be inapplicable with reason", () => { var r = Report(); var d = new Dictionary<string, Observation>(r.Results) {["overlay-shortcut"] = Observation.NotApplicable}; ValidationRules.Validate(r with {Scope = TestScope.DesktopUnfocused, Results = d, Notes = "Desktop has no game overlay"}); });
+Test("not applicable requires explanation", () => { var r = Report(); var d = new Dictionary<string, Observation>(r.Results) {["haptics"] = Observation.NotApplicable}; Throws(() => ValidationRules.Validate(r with {Results = d})); });
+Test("empty observation report rejected", () => Throws(() => ValidationRules.Validate(Report() with {Results = ValidationRules.Keys.ToDictionary(k => k, _ => Observation.Untested)})));
+Test("report file roundtrip and duplicate prevention", () => WithConfig((_, dir) => { var r = Report(); var file = AppFiles.SaveReport(dir, r); Check(AppFiles.Load<ValidationReport>(file)!.Id == r.Id); Throws(() => AppFiles.SaveReport(dir, r)); }));
 Console.WriteLine($"{passed} passed; {failed} failed");
 return failed == 0 ? 0 : 1;

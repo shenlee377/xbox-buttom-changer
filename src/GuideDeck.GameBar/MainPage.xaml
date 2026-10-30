@@ -5,10 +5,12 @@
    <PivotItem Header="狀態"><ScrollViewer><StackPanel Spacing="12">
     <TextBlock Text="原生 Game Bar 保留" FontSize="22"/>
     <TextBlock Text="此 widget 不攔截、不模擬 Guide。Steam 是否仍有響應，需要在您的手把與遊戲中測試。" TextWrapping="Wrap"/>
-    <TextBlock Text="設定狀態：未與 Steam 即時同步" Foreground="#FFE1AE" TextWrapping="Wrap"/>
+    <TextBlock x:Name="Summary" Text="尚未取得桌面管理器的檢查摘要。" Foreground="#FFE1AE" TextWrapping="Wrap"/>
+    <Button Content="開啟同套件的桌面管理器" Click="OpenManager"/>
+    <Button Content="更新最近檢查摘要" Click="RefreshSummary"/>
     <TextBlock Text="1. 在 Steam 控制器設定匯出自己的 SDL mapping。&#10;2. 到「mapping」只移除 Guide，保留原始字串。&#10;3. 將結果貼回 Steam（若該版本提供匯入）。&#10;4. 回到「驗收」記錄結果。" TextWrapping="Wrap"/>
     <TextBlock Text="不要停用整個 Steam Input 或 Overlay。若 Steam 未採用 mapping，這條路徑無效，請恢復原始 mapping。" TextWrapping="Wrap"/>
-    <TextBlock Text="桌面版可檢查 config.vdf 並進行備份／還原。本 widget 不會偷偷修改 Steam 檔案。" TextWrapping="Wrap"/>
+    <TextBlock Text="桌面管理器可讀寫 Steam 設定；操作時會開啟桌面視窗，可能切出遊戲。摘要超過 30 秒會標示過期，不把舊資料當成即時狀態。" TextWrapping="Wrap"/>
    </StackPanel></ScrollViewer></PivotItem>
    <PivotItem Header="mapping"><ScrollViewer><StackPanel Spacing="10">
     <TextBlock Text="只移除一行 mapping 裡的 guide:bN" TextWrapping="Wrap"/>
@@ -22,9 +24,11 @@
    </StackPanel></ScrollViewer></PivotItem>
    <PivotItem Header="驗收"><ScrollViewer><StackPanel Spacing="10">
     <TextBlock Text="人工觀察記錄，非自動偵測" Foreground="#FFE1AE"/>
-    <TextBox x:Name="Context" Header="遊戲／桌面、手把、連接方式、Steam 版本"/>
+    <TextBox x:Name="Game" Header="遊戲名稱／桌面"/>
+    <TextBox x:Name="Context" Header="手把、連接方式、Steam 版本"/>
     <ComboBox x:Name="Scope" Header="情境" SelectedIndex="0"><ComboBoxItem Content="桌面：Steam 未聚焦"/><ComboBoxItem Content="桌面：Steam 已聚焦"/><ComboBoxItem Content="Steam 遊戲"/><ComboBoxItem Content="非 Steam 遊戲"/></ComboBox>
     <StackPanel x:Name="Checks" Spacing="8"/>
+    <TextBox x:Name="Notes" Header="說明（不適用項目必填）" AcceptsReturn="True" TextWrapping="Wrap"/>
     <Button Content="儲存觀察記錄" Click="SaveReport"/>
     <TextBlock Text="其他啟動器尚未實作；此工作台不代表通用第三方 Guide 封鎖。" TextWrapping="Wrap"/>
    </StackPanel></ScrollViewer></PivotItem>

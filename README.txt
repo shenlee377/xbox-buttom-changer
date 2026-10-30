@@ -1,157 +1,149 @@
-GuideDeck 0.1 — Steam Guide mapping 實驗原型
+GuideDeck 0.2 — Xbox Button Changer
+2026-10-30
 ============================================================
 
-目標
-保留 Windows 原生 Guide → Game Bar；研究只移除 Steam 控制器 mapping
-裡的 Guide 綁定，保留普通按鍵與 Steam Input／Overlay 的啟用設定。
+目的與目前邊界
+保留微軟原生 Guide → Game Bar；研究阻止 Steam 對同一次 Guide 觸發
+聚焦、Big Picture 或遊戲 Overlay。此版使用 Steam SDL mapping 覆寫，
+不是已完成的全系統 Guide 防火牆。沒有驅動、程序注入、記憶體修改、
+全域鍵盤模擬或強制終止 Steam。不修改 Steam Input／Overlay 啟用開關。
 
-這是可以建置、預覽、寫入與還原的設定適配器原型，不是已驗證的
-第三方全域 Guide 防火牆。沒有核心驅動、遊戲／Steam 注入、全域鍵盤
-模擬或強制終止 Steam。沒有改動 Windows、Steam Input、Overlay 開關。
+實際效果尚需 Windows＋Steam＋實體手把測試。Steam 可能忽略 mapping、
+走其他輸入 API 或重新寫回設定；不會因為 mapping 沒有 guide 欄位就
+顯示「已成功攔截」。其他第三方啟動器尚未實作。
 
-目前的限制
-1. 尚未在實體 Windows＋Xbox 手把＋Steam 上驗證效果。
-2. Steam 可能不走 SDL mapping 路徑、忽略此覆寫，或重新寫回綁定。
-   Guide 是否真的不再呼叫第三方，必須完成實機驗收。
-3. 只修改已存在、明確可辨識的 mapping，不從別人的 GUID／預設
-   mapping 猜測，也不在找不到設定時聲稱成功。
-4. 其他啟動器尚未實作；沒有跨程序單鍵過濾。
-5. 桌面版與 Game Bar widget 的歷史／備份各自儲存，尚無即時 IPC。
-6. 不保證反作弊或防毒相容性；目前方案不接觸遊戲程序。
+下載與安裝
+https://github.com/shenlee377/xbox-buttom-changer/releases
 
-快速開始：Windows 桌面版
-------------------------------------------------------------
-如果已取得 GuideDeck-windows-x64.zip：
-  解壓縮後執行 GuideDeck.exe。此為未簽章的開發原型，並非安裝套件。
-  不需要另行安裝 .NET runtime；無需管理員權限。
-  如果 Windows 政策拒絕執行，不要求停用安全功能；可改用本機原始碼建置。
+免安裝：下載 GuideDeck-windows-x64.zip，解壓縮後執行 GuideDeck.exe。
+內含 .NET runtime，預設不需要管理員權限。
 
+安裝腳本：下載並檢視 Install-GuideDeck.ps1，依自己的 PowerShell
+執行原則執行：
+  .\Install-GuideDeck.ps1 -Version v0.2.0
+  # 選配：安裝後開啟
+  .\Install-GuideDeck.ps1 -Version v0.2.0 -Launch
+
+腳本會下載指定 Release 的 ZIP 與 SHA256SUMS.txt、驗證完整性，安裝至
+%LOCALAPPDATA%\Programs\GuideDeck 並建立開始功能表捷徑。SHA-256 核對
+的是 Release 檔案完整性，不等於已取得發行者數位簽章。本版未簽章，
+若組織政策不允許執行，腳本不要求停用安全功能，可改用允許的部署方式。
+
+離線安裝（需同版本 ZIP 與 checksum）：
+  .\Install-GuideDeck.ps1 -ArchivePath .\GuideDeck-windows-x64.zip -ChecksumFile .\SHA256SUMS.txt
+
+更新前先關閉 GuideDeck；腳本不會關閉遊戲或 Steam。不覆蓋不是由本
+腳本建立的同名資料夾。安裝與更新不會修改 Steam 設定。
+
+移除：執行安裝資料夾的 Uninstall-GuideDeck.ps1。備份、觀察與 Steam
+設定保留；若要復原 Guide 修改，請先在程式中還原，再移除程式。
+
+使用流程
 1. 偵測 Steam 或選擇 Steam/config/config.vdf。
-2. 若找到支援的 mapping，選擇要測試的控制器並閱讀前後差異。
-3. 若沒有 mapping，使用「mapping 工作台」；不要用 samples 的假 GUID。
-4. 完整離開 Steam。確認實驗性修改後，點「備份並套用」。
-   程式會拒絕在 steam／steamwebhelper 執行中寫入，也不會幫您關閉遊戲。
-5. 重新啟動 Steam，完成下方實機驗收。
-6. 需要還原時，先離開 Steam，再選取備份。若設定已被您或 Steam
-   後續修改，程式不會覆蓋它；原始資料仍在備份 JSON 的 OriginalBase64。
+2. 核對控制器 GUID／CRC，選擇一筆 mapping，閱讀前後差異。
+3. 完整離開 Steam，確認實驗性修改，按「備份並套用」。
+4. 重新啟動 Steam，在桌面／遊戲中完成驗收。
+5. 需要還原時先離開 Steam，選擇 *.backup.json、閱讀還原預覽，再還原。
 
-找不到 mapping 時
-------------------------------------------------------------
-部分 Steam 版本可在「設定 → 控制器 → 測試／設定裝置輸入」中匯出／
-複製 mapping。名稱隨版本不同；先保存自己控制器的原始 mapping。
-將一行字串貼到工作台，按「預覽移除 Guide」。若產生結果，保留原始
-字串，再依該 Steam 版本的匯入方式貼回。若客戶端沒有匯入功能，
-這個途徑不能直接使用，不要把結果設成全域 SDL 環境變數。
+找不到 mapping：部分 Steam 版本可在「設定 → 控制器 → 測試／設定
+裝置輸入」中複製自己的 SDL mapping。貼到工作台預覽後，使用該版本
+提供的匯入方式貼回。選項名稱隨版本不同；不支援匯入時不要硬套。
+不要使用別人的 GUID，也不要把結果設成全域 SDL 環境變數。
 
-直接寫檔只支援：
+修改範圍
+只支援已存在且唯一的：
   "InstallConfigStore" { "SDL_GamepadBind" "<一行或多行 mapping>" }
-允許一般巢狀物件、// 註解、UTF-8、UTF-8 BOM、LF／CRLF。
-只在選中那行刪除一個 guide:bN 欄位；GUID、CRC、順序、名稱、額外
-按鍵和其他 mapping 保留。其他所有檔案位元組保持原樣。
-未知格式、重複 identity、跳脫 mapping 或任一不明 mapping 會拒絕寫入。
-缺少 guide 欄位不代表 Steam 不會從其他 API 讀到 Guide。
+處理 UTF-8、BOM、LF／CRLF、// 註解與一般巢狀物件；保留其他位元組。
+不猜測預設 mapping，不新增未知設定。未知格式、重複欄位、重複
+GUID／CRC、非 Windows mapping、未知 Guide 格式會拒絕寫入。
 
-安全與復原範圍
-------------------------------------------------------------
-預覽唯讀；套用重新計算差異並核對 SHA-256。備份先寫入並 flush，
-修改採同資料夾暫存檔後替換，再讀回驗證。鎖檔防止本工具同時寫入。
-寫入前再次檢查 Steam 與來源內容；但 Steam 並不遵守本工具的鎖檔，
-因此使用者仍需讓 Steam 在整個操作期間保持離開。這不是跨程序交易保證。
-還原只接受有效的 Guide 修改紀錄，且目前完整檔案 hash 必須仍等於
-套用後 hash。設定有漂移時拒絕自動還原，避免抹掉後續偏好。
+預覽後設定變更會使預覽失效。程式開啟時每 5 秒檢查已選的設定，
+偵測到變動後會撤銷過期預覽與未儲存觀察；程式關閉後不做背景監測。
+Steam 執行中的寫入／還原會被拒絕。需讓 Steam 在整個修改期間保持
+離開；Steam 不遵守本工具鎖檔，不能保證跨程序無競態。
 
-一般位置（不會上傳）
-  桌面備份：%LOCALAPPDATA%\GuideDeck\Backups
-  桌面觀察：%LOCALAPPDATA%\GuideDeck\Reports
-  widget 資料：%LOCALAPPDATA%\Packages\<widget PFN>\LocalState
-備份包含完整 config.vdf，可能包含私人資料；不應公開分享。
-本工具不讀取 loginusers.vdf、帳號憑證或遊戲記憶體。
-刪除程式不會自動還原設定，請先在 UI 還原需要的 mapping。
+備份與局部還原
+0.2 的 schema v2 備份只保存選中 mapping 的修改前後字串及 hash，
+不保存 Steam 設定檔的其他內容。資料只留在本機。
+還原依 GUID／CRC 找到原 mapping，只有目前內容仍等於本工具套用的
+內容時才還原該行；其他設定或其他控制器的後續變更會保留。
+若該 mapping 已被重新編排按鍵或移除，會停止還原。已是原始狀態時
+不重複寫入。舊版 v1 備份仍可讀取，但同樣只做局部還原。
+v1 備份含完整 config.vdf，可能包含私人資料，請勿公開分享。
 
-Game Bar widget
-------------------------------------------------------------
-src/GuideDeck.GameBar 是可由 Visual Studio 建置的 UWP widget 專案。
-其介面包含：狀態、mapping 工作台、備份／複製原始 mapping、遊戲驗收。
-與桌面版共用 Mapping.cs；不需要背景 Broker 就能處理剪貼簿工作流。
-Game Bar 的設定圖示會切換至 mapping 頁。
-原型停用釘選，避免在遊戲中持續顯示可操作的設定。
+驗收與歷史
+人工觀察分成桌面 Steam 未聚焦、桌面 Steam 聚焦、Steam 遊戲、其他
+遊戲。不適用項目需寫明原因；核心項目不能跳過。
+紀錄保存當時設定 hash、mapping identity/hash、OS 與填寫的環境。
+狀態區分：僅供參考、設定變更需重測、有失敗、尚未測完、此情境
+人工驗收通過。只對該次填寫的環境有效，不推論所有遊戲都通過。
+改變環境、遊戲、測試情境或控制器會清除未儲存的舊觀察。
+「紀錄」頁可查看最近 100 份紀錄並匯出選定 JSON，不含 Steam 原檔。
 
-Windows 建置需求：
-  Visual Studio 2022，UWP 開發工具，Windows SDK 10.0.19041.0，.NET 8 SDK。
-  UWP 專案使用 Microsoft.Gaming.XboxGameBar 7.2.240903001。
-  此專案尚未在 Windows 的 UWP XAML／AppX 工具鏈上完成建置與執行驗證。
+Game Bar 整合
+UWP widget 與 WPF 桌面 companion 打包在同一 app package。
+widget 可：
+  - 開啟同套件的桌面管理器（可能切出遊戲）。
+  - 顯示桌面管理器最近檢查摘要；超過 30 秒標示過期。
+  - 使用共用的 mapping 轉換與驗收規則。
+  - 將人工觀察存到共用 Reports，供桌面管理器查看／匯出。
 
-部署：
-  1. 在 Visual Studio 開啟 src/GuideDeck.GameBar/GuideDeck.GameBar.csproj。
-  2. 選 Debug / x64，還原 NuGet，Build，再 Deploy。
-     若開發部署需要系統開發設定，請依自己的 Windows 政策處理；
-     不必關閉 Secure Boot 或記憶體完整性。
-  3. 開啟 Game Bar 的 Widgets 選單，選 GuideDeck。
-     Guide 不保證直接聚焦此 widget；它不是取代 Game Bar 首頁。
-  4. 測試一般啟動、Game Bar 啟動、重複啟動、設定圖示、關閉與重新開啟。
+widget 不直接讀寫 Steam 原始設定，因此它儲存的觀察不綁定當前設定，
+桌面會顯示「未綁定設定，僅供參考」。不把摘要當成實際攔截證明。
+widget 不保證在按 Guide 後自動取得焦點；不取代 Game Bar 首頁。
+關閉 widget 不影響已寫入的 Steam mapping；無需常駐輸入代理。
 
-桌面版採 WPF，以便先交付可建置的測試工具。Game Bar widget 採官方
-UWP XAML 技術；核心沒有綁定 WPF，可另接 WinUI 3，不須重寫修改邏輯。
+儲存位置
+獨立桌面版：%LOCALAPPDATA%\GuideDeck
+同套件版：%LOCALAPPDATA%\Packages\<package family name>\LocalState\GuideDeck
+內含 Backups、Reports、preferences.json、status-summary.json。
+獨立版與套件版的資料分開，不自動搬移；widget 原始字串備份另留在
+該套件 LocalState。沒有上傳遙測或帳號憑證。
 
-從原始碼建置與測試
-------------------------------------------------------------
-在 GuideDeck 目錄：
+建置／部署
+.NET 8 SDK：
   dotnet run --project tests/GuideDeck.Tests -c Release
-  dotnet build src/GuideDeck.Desktop -c Release
-  dotnet run --project src/GuideDeck.Desktop
+  .\scripts\build-windows.ps1
 
-獨立 Windows x64 桌面版：
-  powershell -File scripts/build-windows.ps1
-包含 widget 的 Windows 建置檢查：
-  powershell -File scripts/build-windows.ps1 -IncludeGameBar
-（Game Bar 部分需要 Visual Studio MSBuild／UWP 工具；腳本不自動安裝或部署。）
+Game Bar 額外需要 Visual Studio 2022 UWP 工具與 Windows SDK 19041+
+（腳本會選取已安裝的最新 SDK）：
+  .\scripts\build-windows.ps1 -IncludeGameBar
+腳本先發佈 companion 至 GameBar/Companion，再建置 UWP 專案。
+在 Visual Studio 選 Debug/x64，Deploy 該 UWP 專案，然後在 Game Bar
+的 Widgets 選單選 GuideDeck。此為開發部署，不是已簽章的商店安裝包。
+依自己的開發部署政策操作，不需關閉 Secure Boot 或記憶體完整性。
+桌面免安裝 ZIP 不包含 widget 的自動安裝。
 
-CLI：
+GitHub Actions
+core：Linux 執行核心測試。
+windows：核心測試、桌面發佈、UWP companion 套件建置、桌面啟動／
+單一實例測試、離線安裝／移除腳本測試。建置產物保留為 workflow artifact。
+Windows CI 仍無法替代實體手把、遊戲與反作弊測試。
+
+CLI
   dotnet run --project src/GuideDeck.Cli -- inspect samples/config.vdf
   dotnet run --project src/GuideDeck.Cli -- preview samples/config.vdf 0 plan.json
   dotnet run --project src/GuideDeck.Cli -- apply plan.json --experimental
   dotnet run --project src/GuideDeck.Cli -- restore <backup.json>
-apply／restore CLI 僅 Windows 開放；samples 是合成測試資料，不能套用到手把。
-preview 與 inspect 可在 Linux 執行。
+samples 是合成 fixture，不能套用到真手把。CLI apply／restore 僅在 Windows 開放。
 
-實機驗收：每個環境個別記錄
-------------------------------------------------------------
-先確認原本會發生問題，記錄 OS build、Steam build、手把、連接方式。
-保持 Steam Input 與 Steam Overlay 啟用，Windows 控制器開啟 Game Bar 啟用。
-分別測：桌面 Steam 未聚焦、桌面 Steam 聚焦、Steam 遊戲、非 Steam 遊戲。
-每種情境記錄：
-  - Guide 是否只開 Game Bar。
-  - Steam 是否未聚焦／未進 Big Picture。
-  - Guide 是否未開 Steam Overlay。
-  - 在遊戲內 Shift+Tab 是否仍能開 Overlay。
-  - 普通按鍵、搖桿、扳機、震動、額外按鍵是否正常。
-未測的項目維持「未測試」，不要填成成功。
-完成後測 Steam 重啟、手把重接、睡眠喚醒；再測還原是否恢復原來行為。
-UI 記錄的是人工觀察，沒有自動判斷其他程序是否吃掉 Guide。
+實機驗收目標
+保持 Steam Input、Steam Overlay、Windows 控制器開啟 Game Bar 啟用。
+每個桌面／遊戲情境分別確認：
+  Guide 只開 Game Bar；不聚焦 Steam／不進 Big Picture；不開 Steam Overlay。
+  遊戲中 Shift+Tab 仍可開 Overlay。
+  普通按鍵、搖桿、扳機、震動與需要的額外按鍵正常。
+再測 Steam 重啟、手把重接與睡眠喚醒，最後確認還原能恢復原有行為。
+未測的項目保持未測試；無法維持其他功能時，這個適配器尚未達標。
 
-專案結構
-  src/GuideDeck.Core       mapping／VDF 解析、精確修改、交易與還原
-  src/GuideDeck.Cli        檢查、產生預覽、套用、還原
-  src/GuideDeck.Desktop    Windows 原型操作介面
-  src/GuideDeck.GameBar    UWP widget 原型，與核心共用 mapping 轉換
-  tests/GuideDeck.Tests    無外部測試套件的可執行回歸測試
-  samples/config.vdf      合成 fixture
-
-研究依據與證據強度
-------------------------------------------------------------
-SDL mapping 語法（官方）：
-https://wiki.libsdl.org/SDL3/SDL_AddGamepadMapping
+依據
+SDL mapping 語法（官方）：https://wiki.libsdl.org/SDL3/SDL_AddGamepadMapping
 SDL 官方資料庫說明 Steam SDL_GamepadBind 欄位：
 https://github.com/libsdl-org/SDL/blob/main/src/joystick/SDL_gamepad_db.h
-另一個 mapping 工具的實作佐證（工具作者的原始碼，非 Valve 契約）：
+mapping 工具原始碼佐證，非 Valve 契約：
 https://github.com/General-Arcade/sdl2-gamepad-tool/blob/master/src/core/SteamConfig.cpp
-Steam 移除 guide mapping 的社群實測線索（非官方、不能證明新版本有效）：
+移除 Guide 的社群線索，非新版本保證：
 https://gist.github.com/rosswd/c0c8b46d1ae5bb4f02207b6195392f93
-Valve 的 Overlay 與快捷鍵說明：
-https://help.steampowered.com/en/faqs/view/3978-072C-18DF-FBF9
-Game Bar widget 官方範例與接口：
-https://github.com/microsoft/XboxGameBarSamples
-https://learn.microsoft.com/en-us/xbox/game-bar/api/xgb-widget
-
-目前設定 adapter 的 Steam 行為相容性：實驗性、未實機驗證。
-程式測試通過與編譯成功，不等於已完成上述實機驗收。
+Valve Overlay／快捷鍵：https://help.steampowered.com/en/faqs/view/3978-072C-18DF-FBF9
+Game Bar：https://github.com/microsoft/XboxGameBarSamples
+同套件桌面啟動：https://learn.microsoft.com/en-us/uwp/api/windows.applicationmodel.fulltrustprocesslauncher

@@ -1,28 +1,22 @@
-GuideDeck 0.1 validation — 2026-10-30
+GuideDeck 0.2 validation — 2026-10-30
 
-Execution host: Linux x64. SDK: .NET 8.0.427.
+Local execution host: Linux x64, .NET 8.0.427.
 
-PASS: dotnet run --project tests/GuideDeck.Tests -c Release
-      31 tests passed, 0 failed. See TEST-RESULTS.txt.
-PASS: dotnet build src/GuideDeck.Cli -c Release
-      0 warnings, 0 errors.
-PASS: dotnet build src/GuideDeck.Desktop -c Release
-      Windows-targeted WPF/XAML cross-build, 0 warnings, 0 errors.
-PASS: dotnet publish src/GuideDeck.Desktop -c Release -r win-x64
-      --self-contained true
-PASS: CLI inspect and preview of samples/config.vdf.
-      Source fixture was not modified.
-PASS: Project, XAML and manifest XML parsing; manifest assets exist.
+Core regression suite covers mapping preservation, unknown-format rejection,
+selected-controller patching, scoped restoration, legacy receipt recovery,
+stale plans, backup integrity, and observation state evaluation.
+Exact output is recorded in TEST-RESULTS.txt.
 
-NOT TESTED: Windows GUI execution, actual Steam config.vdf versions,
-            Xbox USB/Bluetooth/Wireless behavior, Game Bar behavior,
-            Steam Input and Shift+Tab preservation in a game,
-            third-party launchers and anti-cheat/antivirus compatibility.
-NOT BUILT: UWP Game Bar widget (requires Windows UWP/AppX toolchain).
-           XML/asset checks are not a substitute for compiling/deploying it.
+Windows-targeted WPF cross-build is run locally. GitHub Actions additionally
+builds on Windows and attempts UWP packaging, desktop startup, single-instance
+activation and installation/uninstallation. See the exact workflow run result:
+https://github.com/shenlee377/xbox-buttom-changer/actions
+The presence of a workflow file does not mean the workflow passed.
 
-No claim is made that Guide is blocked in Steam in any tested hardware
-environment. This artifact proves the narrowly-scoped config/mapping
-transform and guarded backup/restore workflow, not input interception.
+NOT VALIDATED: actual Steam mapping effectiveness, Xbox USB/Bluetooth/Wireless
+hardware behavior, Game Bar game input isolation, game-specific behavior,
+third-party launchers, anti-cheat/antivirus compatibility, Microsoft Store
+certification, or production signing.
 
-Regression fixtures are synthetic and contain no user account data.
+No claim is made that Guide is blocked across all Steam input paths.
+All fixtures are synthetic. No personal Steam configuration was used.

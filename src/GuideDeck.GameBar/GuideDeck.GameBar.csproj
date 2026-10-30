@@ -15,12 +15,18 @@
   <Compile Include="App.xaml.cs"><DependentUpon>App.xaml</DependentUpon></Compile>
   <Compile Include="MainPage.xaml.cs"><DependentUpon>MainPage.xaml</DependentUpon></Compile>
   <Compile Include="..\GuideDeck.Core\Mapping.cs"><Link>Shared\Mapping.cs</Link></Compile>
+  <Compile Include="..\GuideDeck.Core\ValidationContract.cs"><Link>Shared\ValidationContract.cs</Link></Compile>
   <AppxManifest Include="Package.appxmanifest"/>
   <Content Include="Assets\*.png"/>
   <Content Include="GameBar\Readme.txt"/>
+  <Content Include="Companion\**\*"/>
+  <SDKReference Include="WindowsDesktop, Version=$(TargetPlatformVersion)"/>
   <PackageReference Include="Microsoft.Gaming.XboxGameBar" Version="7.2.240903001"/>
   <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.2.14"/>
  </ItemGroup>
  <PropertyGroup><VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">17.0</VisualStudioVersion></PropertyGroup>
  <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets"/>
+ <Target Name="CheckDesktopCompanion" BeforeTargets="PrepareForBuild">
+  <Error Condition="!Exists('$(MSBuildProjectDirectory)\Companion\GuideDeck.exe')" Text="Publish the desktop companion first: run scripts/build-windows.ps1 -IncludeGameBar"/>
+ </Target>
 </Project>

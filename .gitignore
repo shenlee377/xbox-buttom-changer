@@ -7,3 +7,8 @@ artifacts/
 *.vdf
 !samples/*.vdf
 *.backup.json
+**/Companion/
+*.mapping.json
+*.msix
+*.appx
+*.cer

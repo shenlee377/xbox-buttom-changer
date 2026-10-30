@@ -26,7 +26,30 @@ PASS Steam running guard blocks apply without backup or change
 PASS stale preview cannot overwrite user changes
 PASS tampered preview cannot broaden mutation
 PASS late Steam launch aborts write and keeps recovery receipt
-PASS restore refuses subsequent Steam/user changes
+PASS restore preserves unrelated subsequent Steam/user changes
 PASS tampered backup is rejected
 PASS cooperating operations cannot overlap
-31 passed; 0 failed
+PASS duplicate root container rejected
+PASS object/string target collision rejected
+PASS duplicate ordinary binding rejected
+PASS CRC case normalized
+PASS invalid CRC rejected
+PASS new receipt contains selected mapping only
+PASS legacy v1 receipt remains restorable without overwriting unrelated settings
+PASS restore follows identity when controller lines reorder
+PASS restore refuses modified normal buttons on same controller
+PASS restore does not recreate a missing controller
+PASS restore is idempotent
+PASS stale restore preview rejected
+PASS restore preview detects receipt modification
+PASS manual report pass limited to exact config
+PASS changed config marks reports stale
+PASS unbound mapping cannot produce pass
+PASS unknown observation cannot produce pass
+PASS failure takes precedence over incomplete
+PASS Steam overlay checks cannot be skipped in Steam game
+PASS desktop overlay check may be inapplicable with reason
+PASS not applicable requires explanation
+PASS empty observation report rejected
+PASS report file roundtrip and duplicate prevention
+54 passed; 0 failed

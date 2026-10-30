@@ -2,7 +2,10 @@ using System.Text;
 
 namespace GuideDeck.Core;
 
-public sealed record MappingCandidate(int Index, string Identity, string Name, string Binding, string Before, string After, int Offset, int Length);
+public sealed record MappingCandidate(int Index, string Identity, string Name, string Binding, string Before, string After, int Offset, int Length)
+{
+    public string DisplayName => $"{Name} · {Identity} · {(Binding.Length == 0 ? "無 Guide 欄位" : Binding)}";
+}
 public sealed record ConfigInspection(IReadOnlyList<MappingCandidate> Mappings, IReadOnlyList<string> Problems);
 
 public static class SteamConfig
@@ -20,11 +23,14 @@ public static class SteamConfig
         var source = Encoding.Latin1.GetString(bytes);
         var tokens = Tokenize(source, start);
         var leaves = new List<Leaf>();
+        var objects = new List<string[]>();
         int cursor = 0;
-        Parse(tokens, ref cursor, [], leaves, false);
+        Parse(tokens, ref cursor, [], leaves, objects, false);
         // Deliberately support only the observed direct InstallConfigStore property.
         var targets = leaves.Where(l => l.Path.SequenceEqual(new[] {"InstallConfigStore", "SDL_GamepadBind"})).ToArray();
-        if (targets.Length != 1) return new([], ["找不到唯一的 InstallConfigStore/SDL_GamepadBind 字串。此格式不支援；不新增或猜測設定。"]);
+        if (targets.Length != 1 || objects.Count(p => p.SequenceEqual(new[] {"InstallConfigStore"})) != 1 ||
+            objects.Any(p => p.SequenceEqual(new[] {"InstallConfigStore", "SDL_GamepadBind"})))
+            return new([], ["找不到唯一的 InstallConfigStore/SDL_GamepadBind 字串。此格式不支援；不新增或猜測設定。"]);
         var token = targets[0].Value;
         var mappings = new List<MappingCandidate>();
         var problems = new List<string>();
@@ -57,15 +63,22 @@ public static class SteamConfig
         if (inspection.Problems.Count != 0) throw new InvalidOperationException(string.Join("\n", inspection.Problems));
         var candidate = inspection.Mappings.SingleOrDefault(m => m.Index == index) ?? throw new ArgumentException("請先選擇 mapping。");
         if (candidate.Binding.Length == 0) throw new InvalidOperationException("這筆 mapping 沒有 Guide 欄位；不代表第三方響應已被阻止。");
-        var replacement = Encoding.UTF8.GetBytes(candidate.After);
+        var result = ReplaceMapping(original, candidate, candidate.After);
+        var check = Inspect(result);
+        if (check.Problems.Count != 0 || check.Mappings[index].Binding.Length != 0) throw new InvalidOperationException("修改後驗證失敗。");
+        return result;
+    }
+
+    internal static byte[] ReplaceMapping(byte[] original, MappingCandidate candidate, string mapping)
+    {
+        var edit = MappingEditor.RemoveGuide(mapping);
+        if (edit.Identity != candidate.Identity) throw new InvalidOperationException("裝置 identity 不一致。");
+        var replacement = Encoding.UTF8.GetBytes(mapping);
         using var output = new MemoryStream();
         output.Write(original.AsSpan(0, candidate.Offset));
         output.Write(replacement);
         output.Write(original.AsSpan(candidate.Offset + candidate.Length));
-        var result = output.ToArray();
-        var check = Inspect(result);
-        if (check.Problems.Count != 0 || check.Mappings[index].Binding.Length != 0) throw new InvalidOperationException("修改後驗證失敗。");
-        return result;
+        return output.ToArray();
     }
 
     private static string Decode(string latin) => Encoding.UTF8.GetString(Encoding.Latin1.GetBytes(latin));
@@ -96,7 +109,7 @@ public static class SteamConfig
         return tokens;
     }
 
-    private static void Parse(List<Token> tokens, ref int i, string[] path, List<Leaf> leaves, bool nested)
+    private static void Parse(List<Token> tokens, ref int i, string[] path, List<Leaf> leaves, List<string[]> objects, bool nested)
     {
         if (path.Length > 64) throw new FormatException("VDF 巢狀層數過多。");
         while (i < tokens.Count)
@@ -111,7 +124,7 @@ public static class SteamConfig
             if (i == tokens.Count) throw new FormatException("VDF 缺少值。");
             var value = tokens[i++];
             var next = path.Append(key).ToArray();
-            if (value.Kind == '{') Parse(tokens, ref i, next, leaves, true);
+            if (value.Kind == '{') { objects.Add(next); Parse(tokens, ref i, next, leaves, objects, true); }
             else if (value.Kind == 's') leaves.Add(new(next, value));
             else throw new FormatException("VDF 值格式錯誤。");
         }

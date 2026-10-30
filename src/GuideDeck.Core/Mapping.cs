@@ -29,6 +29,8 @@ namespace GuideDeck.Core
             var bindings = fields.Skip(2).Where(f => f.Length > 0).ToArray();
             if (bindings.Any(f => f.IndexOf(':') <= 0 || f.Any(char.IsWhiteSpace)))
                 throw new FormatException("mapping 欄位格式不明，停止修改。");
+            if (bindings.GroupBy(f => f.Substring(0, f.IndexOf(':')), StringComparer.Ordinal).Any(g => g.Count() > 1))
+                throw new FormatException("mapping 有重複欄位，停止修改。");
             foreach (var required in new[] {"a:", "b:", "leftx:", "lefty:"})
                 if (!bindings.Any(f => f.StartsWith(required, StringComparison.Ordinal)))
                     throw new FormatException("mapping 缺少基本按鍵／軸，停止修改。");
@@ -38,9 +40,10 @@ namespace GuideDeck.Core
             if (guides.Length > 1 || (guides.Length == 1 && !Regex.IsMatch(guides[0], "\\Aguide:b[0-9]+\\z")))
                 throw new FormatException("Guide 綁定重複或不是已支援的按鈕格式，停止修改。");
             var crc = bindings.Where(f => f.StartsWith("crc:", StringComparison.Ordinal)).ToArray();
-            if (crc.Length > 1) throw new FormatException("CRC 重複，無法區分裝置。");
+            if (crc.Length > 1 || (crc.Length == 1 && !Regex.IsMatch(crc[0], "\\Acrc:[0-9a-fA-F]{4}\\z")))
+                throw new FormatException("CRC 格式不明，無法區分裝置。");
             return new MappingEdit {
-                Identity = fields[0].ToLowerInvariant() + "|" + (crc.Length == 1 ? crc[0] : "no-crc"),
+                Identity = fields[0].ToLowerInvariant() + "|" + (crc.Length == 1 ? crc[0].ToLowerInvariant() : "no-crc"),
                 Name = fields[1], Original = line,
                 Modified = string.Join(",", fields.Where((f, i) => i < 2 || !f.StartsWith("guide:", StringComparison.Ordinal))),
                 RemovedBinding = guides.Length == 1 ? guides[0] : ""

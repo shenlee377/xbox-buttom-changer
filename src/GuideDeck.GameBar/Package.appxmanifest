@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
- xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3" IgnorableNamespaces="uap uap3">
- <Identity Name="GuideDeck.Prototype" Publisher="CN=GuideDeckDevelopment" Version="0.1.0.0" ProcessorArchitecture="x64"/>
+ xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
+ xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
+ xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities" IgnorableNamespaces="uap uap3 desktop rescap">
+ <Identity Name="GuideDeck.Prototype" Publisher="CN=GuideDeckDevelopment" Version="0.2.0.0" ProcessorArchitecture="x64"/>
  <Properties><DisplayName>GuideDeck Prototype</DisplayName><PublisherDisplayName>GuideDeck Development</PublisherDisplayName><Logo>Assets\StoreLogo.png</Logo></Properties>
  <Dependencies><TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.19041.0" MaxVersionTested="10.0.19041.0"/></Dependencies>
  <Resources><Resource Language="zh-TW"/><Resource Language="en-US"/></Resources>
@@ -12,7 +14,9 @@
   </uap:VisualElements>
   <Extensions><uap3:Extension Category="windows.appExtension"><uap3:AppExtension Name="microsoft.gameBarUIExtension" Id="GuideDeck" DisplayName="GuideDeck" Description="Steam Guide mapping workbench" PublicFolder="GameBar"><uap3:Properties>
    <GameBarWidget Type="Standard"><HomeMenuVisible>true</HomeMenuVisible><PinningSupported>false</PinningSupported><Window><Size><Width>520</Width><Height>700</Height><MinWidth>400</MinWidth><MinHeight>450</MinHeight><MaxWidth>1000</MaxWidth><MaxHeight>1000</MaxHeight></Size><ResizeSupported><Horizontal>true</Horizontal><Vertical>true</Vertical></ResizeSupported></Window></GameBarWidget>
-  </uap3:Properties></uap3:AppExtension></uap3:Extension></Extensions>
+  </uap3:Properties></uap3:AppExtension></uap3:Extension>
+   <desktop:Extension Category="windows.fullTrustProcess" Executable="Companion\GuideDeck.exe"><desktop:FullTrustProcess/></desktop:Extension>
+  </Extensions>
  </Application></Applications>
  <!-- SDK marshaling declarations adapted from Microsoft's MIT-licensed sample; see THIRD-PARTY-NOTICES.txt. -->
  <Extensions><Extension Category="windows.activatableClass.proxyStub">
@@ -42,4 +46,5 @@
         <Interface Name="Microsoft.Gaming.XboxGameBar.Private.IXboxGameBarWidgetPrivate4" InterfaceId="5638D65A-3733-48CC-90E5-984688D62786" />
       </ProxyStub>
     </Extension></Extensions>
+ <Capabilities><rescap:Capability Name="runFullTrust"/></Capabilities>
 </Package>
