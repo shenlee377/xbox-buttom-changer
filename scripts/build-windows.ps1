@@ -12,6 +12,15 @@ try {
     Copy-Item VALIDATION.txt artifacts/windows-x64/VALIDATION.txt
     Copy-Item THIRD-PARTY-NOTICES.txt artifacts/windows-x64/THIRD-PARTY-NOTICES.txt
     Copy-Item scripts/Uninstall-GuideDeck.ps1 artifacts/windows-x64/Uninstall-GuideDeck.ps1
+    $packages = if ($env:NUGET_PACKAGES) { $env:NUGET_PACKAGES } else { Join-Path $env:USERPROFILE '.nuget/packages' }
+    foreach ($package in @('microsoft.netcore.app.runtime.win-x64', 'microsoft.windowsdesktop.app.runtime.win-x64')) {
+        $packageRoot = Join-Path $packages $package
+        if (Test-Path $packageRoot) {
+            Get-ChildItem $packageRoot -File -Recurse | Where-Object { $_.Name -match '^(LICENSE(\.TXT)?|THIRD-PARTY-NOTICES\.TXT)$' } | ForEach-Object {
+                Copy-Item $_.FullName (Join-Path 'artifacts/windows-x64' ($package + '-' + $_.Name))
+            }
+        }
+    }
     Compress-Archive -Path artifacts/windows-x64/* -DestinationPath artifacts/GuideDeck-windows-x64.zip -Force
     if ($IncludeGameBar) {
         $companion = Join-Path $repo 'src/GuideDeck.GameBar/Companion'

@@ -32,6 +32,12 @@ jobs:
       - name: Installer offline smoke test
         shell: powershell
         run: |
+          $bad = Join-Path $env:TEMP 'guidedeck-bad-checksum.txt'
+          ('0' * 64) + '  GuideDeck-windows-x64.zip' | Set-Content $bad
+          $rejected = $false
+          try { ./scripts/Install-GuideDeck.ps1 -ArchivePath artifacts/GuideDeck-windows-x64.zip -ChecksumFile $bad -SkipShortcut } catch { $rejected = $true }
+          if (-not $rejected) { throw 'Installer accepted an incorrect checksum.' }
+          ./scripts/Install-GuideDeck.ps1 -ArchivePath artifacts/GuideDeck-windows-x64.zip -ChecksumFile artifacts/SHA256SUMS.txt -SkipShortcut
           ./scripts/Install-GuideDeck.ps1 -ArchivePath artifacts/GuideDeck-windows-x64.zip -ChecksumFile artifacts/SHA256SUMS.txt -SkipShortcut
           ./scripts/Uninstall-GuideDeck.ps1
       - name: Upload Windows build output

@@ -15,6 +15,7 @@ $work = Join-Path ([IO.Path]::GetTempPath()) ('GuideDeck-install-' + [guid]::New
 $stage = $install + '.staging-' + [guid]::NewGuid().ToString('N')
 $rollback = $install + '.previous-' + [guid]::NewGuid().ToString('N')
 $swapped = $false
+$committed = $false
 function Assert-NotLink([string]$Path) {
     if ((Test-Path -LiteralPath $Path) -and ((Get-Item -LiteralPath $Path -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)) { throw "Refusing linked directory: $Path" }
 }
@@ -64,9 +65,17 @@ try {
         $shortcut = $shell.CreateShortcut($shortcutPath)
         $shortcut.TargetPath = Join-Path $install 'GuideDeck.exe'; $shortcut.WorkingDirectory = $install; $shortcut.Save()
     }
+    $committed = $true
     if (Test-Path $rollback) { Remove-Item -LiteralPath $rollback -Recurse -Force }
     Write-Output "Installed $Version to $install. Steam settings were not changed."
     if ($Launch) { Start-Process (Join-Path $install 'GuideDeck.exe') }
+} catch {
+    if ($swapped -and -not $committed) {
+        $marker = Join-Path $install $markerName
+        if ((Test-Path $marker) -and (Get-Content $marker -Raw | ConvertFrom-Json).Product -eq 'GuideDeck') { Remove-Item -LiteralPath $install -Recurse -Force }
+        if ((Test-Path $rollback) -and -not (Test-Path $install)) { Move-Item -LiteralPath $rollback -Destination $install }
+    }
+    throw
 } finally {
     if (Test-Path $work) { Remove-Item -LiteralPath $work -Recurse -Force }
     if (Test-Path $stage) { Remove-Item -LiteralPath $stage -Recurse -Force }
