@@ -13,6 +13,21 @@ activation and installation/uninstallation. See the exact workflow run result:
 https://github.com/shenlee377/xbox-buttom-changer/actions
 The presence of a workflow file does not mean the workflow passed.
 
+Confirmed successful Windows CI:
+  Run: 41060408959
+  Commit: 4c2539670940a4833e0c5a8f22bc13f12f5f329f
+  https://github.com/shenlee377/xbox-buttom-changer/actions/runs/41060408959
+  PASS 54 core tests on Linux and Windows
+  PASS Windows WPF desktop build/publish
+  PASS UWP C#/XAML compilation and unsigned MSIX package generation
+  PASS desktop startup and second-instance activation
+  PASS single-file companion startup and second-instance activation
+  PASS rejection of incorrect installer checksum
+  PASS offline per-user install, repeated update and uninstall
+Release binaries were taken from this run's uploaded artifact, not a later
+unverified local rebuild. The standalone EXE is the tested single-file
+companion extracted from the produced MSIX. The development MSIX is unsigned.
+
 NOT VALIDATED: actual Steam mapping effectiveness, Xbox USB/Bluetooth/Wireless
 hardware behavior, Game Bar game input isolation, game-specific behavior,
 third-party launchers, anti-cheat/antivirus compatibility, Microsoft Store

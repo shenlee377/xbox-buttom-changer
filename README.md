@@ -18,6 +18,8 @@
 
 從 [Releases](https://github.com/shenlee377/xbox-buttom-changer/releases) 下載 `GuideDeck-windows-x64.zip`，解壓縮後執行 `GuideDeck.exe`。不需要另外安裝 .NET runtime。
 
+也提供[單檔免安裝 EXE](https://github.com/shenlee377/xbox-buttom-changer/releases/download/v0.2.0/GuideDeck.exe)；[ZIP](https://github.com/shenlee377/xbox-buttom-changer/releases/download/v0.2.0/GuideDeck-windows-x64.zip) 較小。兩者都是桌面版，並非 Game Bar widget 的自動安裝程式。
+
 也可下載並檢視 `Install-GuideDeck.ps1` 後執行：
 
 ```powershell
@@ -25,6 +27,8 @@
 ```
 
 腳本下載對應版本、核對 SHA-256、安裝到 `%LOCALAPPDATA%\Programs\GuideDeck`，並建立開始功能表捷徑，不需要管理員權限。移除腳本保留備份／觀察與 Steam 設定。這是未簽章的開發版；若政策不允許執行腳本，可使用免安裝 ZIP，腳本不修改 Windows 安全設定。
+
+[下載安裝腳本](https://github.com/shenlee377/xbox-buttom-changer/releases/download/v0.2.0/Install-GuideDeck.ps1) · [校驗檔](https://github.com/shenlee377/xbox-buttom-changer/releases/download/v0.2.0/SHA256SUMS.txt)
 
 Game Bar 需要額外的 UWP 開發套件建置與部署；桌面 ZIP 不會自動安裝 widget。開啟桌面管理器可能切出遊戲。詳細步驟見 [README.txt](README.txt)。
 
@@ -38,6 +42,8 @@ dotnet run --project tests/GuideDeck.Tests -c Release
 ```
 
 GitHub Actions 分別執行核心測試與 Windows 桌面／UWP 建置。成功建置不代表手把行為或反作弊相容性已驗證；請閱讀 [VALIDATION.txt](VALIDATION.txt)。
+
+0.2 的 [Windows CI 驗證](https://github.com/shenlee377/xbox-buttom-changer/actions/runs/41060408959)已通過：54 項核心測試、UWP 套件建置、桌面與單檔版啟動／單一實例，以及安裝、更新、校驗拒絕與移除測試。
 
 **實機驗收目標**
 
