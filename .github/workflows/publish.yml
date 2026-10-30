@@ -1,0 +1,66 @@
+name: Publish verified release
+on:
+  workflow_dispatch:
+    inputs:
+      verified_run_id:
+        description: Successful main-branch Build and verify run ID
+        required: true
+        type: string
+      version:
+        description: New prerelease tag (for example v0.2.0)
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    env:
+      RUN_ID: ${{ inputs.verified_run_id }}
+      RELEASE_VERSION: ${{ inputs.version }}
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Require a successful trusted build
+        id: checked
+        uses: actions/github-script@v7
+        with:
+          script: |
+            if (!/^[0-9]+$/.test(process.env.RUN_ID)) throw new Error('Invalid run ID');
+            if (!/^v[0-9]+\.[0-9]+\.[0-9]+$/.test(process.env.RELEASE_VERSION)) throw new Error('Invalid version');
+            const {data: run} = await github.rest.actions.getWorkflowRun({...context.repo, run_id: Number(process.env.RUN_ID)});
+            if (run.conclusion !== 'success' || run.status !== 'completed' || run.head_branch !== 'main' || !['push', 'workflow_dispatch'].includes(run.event) ||
+                run.name !== 'Build and verify' || run.path !== '.github/workflows/build.yml' || run.head_repository.full_name !== process.env.GH_REPO) {
+              throw new Error('Only a successful trusted main-branch build can be published');
+            }
+            core.setOutput('sha', run.head_sha);
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.verified_run_id }}
+          name: GuideDeck-windows
+          path: verified
+      - name: Prepare verified EXE, ZIP and scripts
+        env:
+          TESTED_SHA: ${{ steps.checked.outputs.sha }}
+        run: python3 scripts/prepare-release.py verified release "$TESTED_SHA" "$RUN_ID" "$RELEASE_VERSION"
+      - name: Upload and publish prerelease
+        env:
+          TESTED_SHA: ${{ steps.checked.outputs.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view "$RELEASE_VERSION" --json isDraft > /tmp/release-state.json 2>/dev/null; then
+            python3 -c 'import json; assert json.load(open("/tmp/release-state.json"))["isDraft"], "Refusing to replace an already published release"'
+            gh release edit "$RELEASE_VERSION" --target "$TESTED_SHA" --notes-file release/NOTES.txt
+          else
+            gh release create "$RELEASE_VERSION" --draft --prerelease --target "$TESTED_SHA" --title "GuideDeck $RELEASE_VERSION — 實驗版" --notes-file release/NOTES.txt
+          fi
+          gh release upload "$RELEASE_VERSION" release/GuideDeck.exe release/GuideDeck-windows-x64.zip release/GuideDeck-GameBar-development.zip release/Install-GuideDeck.ps1 release/Uninstall-GuideDeck.ps1 release/GuideDeck-LICENSES.txt release/SHA256SUMS.txt --clobber
+          gh release edit "$RELEASE_VERSION" --draft=false --prerelease --target "$TESTED_SHA"

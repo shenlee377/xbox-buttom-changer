@@ -45,6 +45,8 @@ GitHub Actions 分別執行核心測試與 Windows 桌面／UWP 建置。成功�
 
 0.2 的 [Windows CI 驗證](https://github.com/shenlee377/xbox-buttom-changer/actions/runs/41060408959)已通過：54 項核心測試、UWP 套件建置、桌面與單檔版啟動／單一實例，以及安裝、更新、校驗拒絕與移除測試。
 
+後續發版可在 Actions 選 **Publish verified release**，填入成功的主分支建置 run ID 和新版本 tag。流程會取用該次已測試的產物、驗證校驗、上傳 EXE／ZIP／腳本並發布 prerelease；拒絕覆蓋已發布版本，不需在本機重新打包。
+
 **實機驗收目標**
 
 保持 Steam Input、Steam Overlay 和 Windows 控制器開啟 Game Bar 功能可用。分別在桌面與遊戲中確認：Guide 只開 Game Bar、不聚焦 Steam、不進 Big Picture、不開 Steam Overlay；遊戲內 Shift+Tab、普通按鍵、扳機與震動仍正常。
