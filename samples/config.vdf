@@ -1,0 +1,16 @@
+// Synthetic fixture, not a real Steam account or a controller recommendation.
+"InstallConfigStore"
+{
+    "SDL_GamepadBind" "03005d085e040000000b000011056800,Demo Xbox Mapping,a:b0,b:b1,x:b2,y:b3,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:a4,righttrigger:a5,guide:b5,paddle1:b15,crc:085d,platform:Windows,"
+    "Software"
+    {
+        "Valve"
+        {
+            "Steam"
+            {
+                "OverlayEnabled" "1"
+                "SteamInput" "unchanged-demo-value"
+            }
+        }
+    }
+}

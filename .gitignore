@@ -1,0 +1,9 @@
+**/bin/
+**/obj/
+**/AppPackages/
+artifacts/
+*.user
+*.pfx
+*.vdf
+!samples/*.vdf
+*.backup.json

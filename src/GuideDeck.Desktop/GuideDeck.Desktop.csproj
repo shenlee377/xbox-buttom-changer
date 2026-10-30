@@ -1,0 +1,4 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>WinExe</OutputType><TargetFramework>net8.0-windows</TargetFramework><UseWPF>true</UseWPF><EnableWindowsTargeting>true</EnableWindowsTargeting><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><AssemblyName>GuideDeck</AssemblyName></PropertyGroup>
+  <ItemGroup><ProjectReference Include="../GuideDeck.Core/GuideDeck.Core.csproj" /></ItemGroup>
+</Project>

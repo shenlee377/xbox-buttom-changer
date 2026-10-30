@@ -1,0 +1,26 @@
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+ <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+ <PropertyGroup>
+  <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration><Platform Condition="'$(Platform)' == ''">x64</Platform>
+  <ProjectGuid>{17621F86-4A96-4EA7-901E-52D49D134256}</ProjectGuid><OutputType>AppContainerExe</OutputType>
+  <RootNamespace>GuideDeck.GameBar</RootNamespace><AssemblyName>GuideDeck.GameBar</AssemblyName><DefaultLanguage>zh-TW</DefaultLanguage>
+  <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier><TargetPlatformVersion Condition="'$(TargetPlatformVersion)' == ''">10.0.19041.0</TargetPlatformVersion><TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
+  <MinimumVisualStudioVersion>15</MinimumVisualStudioVersion><ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+  <RestoreProjectStyle>PackageReference</RestoreProjectStyle><LangVersion>8.0</LangVersion><AppxPackageSigningEnabled>false</AppxPackageSigningEnabled><AppxBundle>Never</AppxBundle>
+  <PlatformTarget>x64</PlatformTarget><OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath><DebugType>pdbonly</DebugType><UseDotNetNativeToolchain>false</UseDotNetNativeToolchain>
+  <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants><XboxGameBar-Platform>x64</XboxGameBar-Platform>
+ </PropertyGroup>
+ <ItemGroup>
+  <ApplicationDefinition Include="App.xaml"/><Page Include="MainPage.xaml"/>
+  <Compile Include="App.xaml.cs"><DependentUpon>App.xaml</DependentUpon></Compile>
+  <Compile Include="MainPage.xaml.cs"><DependentUpon>MainPage.xaml</DependentUpon></Compile>
+  <Compile Include="..\GuideDeck.Core\Mapping.cs"><Link>Shared\Mapping.cs</Link></Compile>
+  <AppxManifest Include="Package.appxmanifest"/>
+  <Content Include="Assets\*.png"/>
+  <Content Include="GameBar\Readme.txt"/>
+  <PackageReference Include="Microsoft.Gaming.XboxGameBar" Version="7.2.240903001"/>
+  <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.2.14"/>
+ </ItemGroup>
+ <PropertyGroup><VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">17.0</VisualStudioVersion></PropertyGroup>
+ <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets"/>
+</Project>

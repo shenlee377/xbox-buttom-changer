@@ -1,0 +1,32 @@
+PASS only Guide changes, including paddles and metadata
+PASS idempotent mapping editor
+PASS final Guide without trailing comma
+PASS Guide-like name and metadata are preserved
+PASS different device CRCs remain distinct
+PASS malformed GUID rejected
+PASS duplicate Guide rejected
+PASS unknown Guide binding rejected
+PASS non-Windows platform rejected
+PASS missing ordinary bindings rejected
+PASS multiline clipboard input rejected
+PASS VDF patch preserves every byte outside selected mapping
+PASS UTF8 BOM CRLF Unicode and escaped unrelated values preserved
+PASS selected controller only
+PASS duplicate identity blocks all writes
+PASS wrong VDF path ignored
+PASS missing mapping does not imply blocked Guide
+PASS duplicate target properties rejected
+PASS malformed VDF rejected
+PASS unclosed string rejected
+PASS invalid UTF8 rejected
+PASS oversized config rejected
+PASS preview is read-only
+PASS apply backup and restore exact bytes
+PASS Steam running guard blocks apply without backup or change
+PASS stale preview cannot overwrite user changes
+PASS tampered preview cannot broaden mutation
+PASS late Steam launch aborts write and keeps recovery receipt
+PASS restore refuses subsequent Steam/user changes
+PASS tampered backup is rejected
+PASS cooperating operations cannot overlap
+31 passed; 0 failed

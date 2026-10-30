@@ -1,0 +1,28 @@
+GuideDeck 0.1 validation — 2026-10-30
+
+Execution host: Linux x64. SDK: .NET 8.0.427.
+
+PASS: dotnet run --project tests/GuideDeck.Tests -c Release
+      31 tests passed, 0 failed. See TEST-RESULTS.txt.
+PASS: dotnet build src/GuideDeck.Cli -c Release
+      0 warnings, 0 errors.
+PASS: dotnet build src/GuideDeck.Desktop -c Release
+      Windows-targeted WPF/XAML cross-build, 0 warnings, 0 errors.
+PASS: dotnet publish src/GuideDeck.Desktop -c Release -r win-x64
+      --self-contained true
+PASS: CLI inspect and preview of samples/config.vdf.
+      Source fixture was not modified.
+PASS: Project, XAML and manifest XML parsing; manifest assets exist.
+
+NOT TESTED: Windows GUI execution, actual Steam config.vdf versions,
+            Xbox USB/Bluetooth/Wireless behavior, Game Bar behavior,
+            Steam Input and Shift+Tab preservation in a game,
+            third-party launchers and anti-cheat/antivirus compatibility.
+NOT BUILT: UWP Game Bar widget (requires Windows UWP/AppX toolchain).
+           XML/asset checks are not a substitute for compiling/deploying it.
+
+No claim is made that Guide is blocked in Steam in any tested hardware
+environment. This artifact proves the narrowly-scoped config/mapping
+transform and guarded backup/restore workflow, not input interception.
+
+Regression fixtures are synthetic and contain no user account data.
