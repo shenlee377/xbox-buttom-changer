@@ -35,7 +35,7 @@ Valve 的 [2025-09-09 更新](https://steamcommunity.com/games/593110/announceme
 
 **實際介面預覽**
 
-以下是 0.3 已驗證的主題預覽；0.4 首頁已改為 Steam Guide 設定流程，最新圖片見 CI 的 GuideDeck-ui-previews artifact。
+以下圖片來自 0.4 已通過驗證的 Windows WPF 程式渲染，並非概念稿。
 
 | 淺色 | 深色 |
 | --- | --- |
@@ -70,7 +70,7 @@ dotnet run --project tests/GuideDeck.Tests -c Release
 
 GitHub Actions 分別執行核心測試與 Windows 桌面／UWP 建置。成功建置不代表手把行為或反作弊相容性已驗證；請閱讀 [VALIDATION.txt](VALIDATION.txt)。
 
-0.3 的 [Windows CI 驗證](https://github.com/shenlee377/xbox-buttom-changer/actions/runs/41070851997)已通過：60 項核心測試、深淺色對比、實際 UI 渲染、系統主題即時切換、手動外觀覆寫，以及桌面／UWP 建置、啟動與安裝流程。
+0.4 的 [Windows CI 驗證](https://github.com/shenlee377/xbox-buttom-changer/actions/runs/41074987802)已通過：84 項核心測試、深淺色對比、實際 UI 渲染、系統主題即時切換，以及桌面／UWP 建置、啟動與安裝流程。實際 Steam／手把行為仍待驗收。
 
 後續發版可在 Actions 選 **Publish verified release**，填入成功的主分支建置 run ID 和新版本 tag。流程會取用該次已測試的產物、驗證校驗、上傳 EXE／ZIP／腳本並發布 prerelease；拒絕覆蓋已發布版本，不需在本機重新打包。
 

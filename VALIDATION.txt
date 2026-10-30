@@ -1,12 +1,31 @@
-GuideDeck 0.4 pending Windows verification — 2026-10-30
+GuideDeck 0.4 validation — 2026-10-30
 
-Local: PASS 84 core cases, PASS WPF cross-build, PASS 16 theme contrast pairs.
-New cases cover existing focus/chord Boolean changes without SDL mappings,
-missing keys as unknown, byte preservation, account isolation, stale plans,
-Steam-running guards, scoped backup/restore and ambiguous-format rejection.
-No actual Windows Steam/controller behavior has been reproduced on this host.
-See docs/STEAM-GUIDE-RESEARCH.txt for direct client-package evidence and limits.
-The previous 0.3 verification below does not constitute a 0.4 Windows pass.
+Confirmed successful Windows CI:
+  Run: 41074987802
+  Commit: 41714bc9aa7e84021c27e6ec3ff7cb11d2ebf169
+  https://github.com/shenlee377/xbox-buttom-changer/actions/runs/41074987802
+  PASS 84 core cases on Linux and Windows
+  PASS WPF desktop and single-file publish, UWP compilation and unsigned MSIX
+  PASS desktop and companion startup / single-instance activation
+  PASS standard/compact light/dark UI renders and live theme updates
+  PASS incorrect installer checksum rejection and per-user install/update/uninstall
+  PASS 16 theme contrast pairs
+
+New core cases cover focus/chord Boolean changes without SDL mappings,
+missing keys as unknown, exact byte preservation, account isolation, stale
+plans, Steam-running guards, scoped backup/restore and format rejection.
+Windows screenshots are actual WPF visual-tree renders, not Steam UI automation.
+Binaries for 0.4 use the artifact from this tested commit.
+
+NOT VALIDATED: actual Steam running with a controller, effectiveness of either
+switch on the user's client branch/hardware, in-game input behavior or Game Bar
+host execution. There is no claim of universal interception or physical-device
+success. Tests use synthetic VDF fixtures. The account picker, setting-name and
+storage-path compatibility still need real Steam-client verification.
+See docs/STEAM-GUIDE-RESEARCH.txt for the official release note and read-only
+client-package evidence. Missing switches deliberately remain unknown.
+
+Previous 0.3 baseline follows:
 
 GuideDeck 0.3 validation — 2026-10-30
 
