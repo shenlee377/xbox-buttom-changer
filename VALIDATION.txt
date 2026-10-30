@@ -1,16 +1,17 @@
 GuideDeck 0.3 validation — 2026-10-30
 
 Confirmed successful CI:
-  Run: 41069316292
-  Commit: a80144585ec2f328e1eb640d448838a7c4c88253
-  https://github.com/shenlee377/xbox-buttom-changer/actions/runs/41069316292
+  Run: 41070851997
+  Commit: a5061b438c1a411a1515ccc8a21bbf4d74590536
+  https://github.com/shenlee377/xbox-buttom-changer/actions/runs/41070851997
 
   PASS 60 core regression cases on Linux and Windows
   PASS 16 semantic color contrast pairs for light/dark themes
   PASS Windows WPF desktop build/publish
   PASS UWP C#/XAML compilation and unsigned MSIX package generation
   PASS desktop and single-file startup / second-instance activation
-  PASS real WPF light/dark PNG rendering without persisting temporary choices
+  PASS standard/compact WPF light/dark PNG rendering; opaque corner checks
+  PASS temporary previews do not change saved appearance choices
   PASS running desktop follows Windows AppsUseLightTheme changes
   PASS appearance preference file changes update the running desktop
   PASS manual light/dark choice overrides subsequent system theme changes

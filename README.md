@@ -55,7 +55,7 @@ dotnet run --project tests/GuideDeck.Tests -c Release
 
 GitHub Actions 分別執行核心測試與 Windows 桌面／UWP 建置。成功建置不代表手把行為或反作弊相容性已驗證；請閱讀 [VALIDATION.txt](VALIDATION.txt)。
 
-0.3 的 [Windows CI 驗證](https://github.com/shenlee377/xbox-buttom-changer/actions/runs/41069316292)已通過：60 項核心測試、深淺色對比、實際 UI 渲染、系統主題即時切換、手動外觀覆寫，以及桌面／UWP 建置、啟動與安裝流程。
+0.3 的 [Windows CI 驗證](https://github.com/shenlee377/xbox-buttom-changer/actions/runs/41070851997)已通過：60 項核心測試、深淺色對比、實際 UI 渲染、系統主題即時切換、手動外觀覆寫，以及桌面／UWP 建置、啟動與安裝流程。
 
 後續發版可在 Actions 選 **Publish verified release**，填入成功的主分支建置 run ID 和新版本 tag。流程會取用該次已測試的產物、驗證校驗、上傳 EXE／ZIP／腳本並發布 prerelease；拒絕覆蓋已發布版本，不需在本機重新打包。
 
