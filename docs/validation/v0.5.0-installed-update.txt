@@ -15,3 +15,11 @@ An external junction target survived user-data cleanup.
 Future test fixture is not part of the public release.
 
 Not runtime verified: physical controllers, Steam / third-party overlay behavior, actual Game Bar recording or anti-cheat compatibility.
+
+Post-publication verification:
+https://github.com/shenlee377/xbox-buttom-changer/releases/tag/v0.5.0
+Publisher CI: https://github.com/shenlee377/xbox-buttom-changer/actions/runs/41157501807
+Anonymous Velopack GithubSource successfully retrieved the real production win-x64 feed.
+Package: GuideDeck.Desktop-0.5.0-win-x64-full.nupkg (74924632 bytes)
+SHA-256: 727A60A3B52F1325773CC6D71C68518C6A763D55420EF10B28F1C7C01173080A
+Older releases without an updater feed were skipped as expected.
