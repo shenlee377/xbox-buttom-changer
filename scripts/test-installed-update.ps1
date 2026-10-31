@@ -20,6 +20,7 @@ $process = Start-Process $setup[0].FullName -ArgumentList '--silent' -PassThru -
 if ($process.ExitCode -ne 0) { throw "Setup failed: $($process.ExitCode)" }
 $exe = Join-Path $install 'current/GuideDeck.exe'
 if (-not (Test-Path $exe)) { throw 'Installed executable missing.' }
+./scripts/capture-ui.ps1 -Executable $exe -OutputDirectory (Join-Path $log 'installed-ui')
 $registry = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall'
 $registration = @(Get-ChildItem $registry | ForEach-Object { Get-ItemProperty $_.PSPath } | Where-Object { $_.DisplayName -eq 'GuideDeck' })
 if ($registration.Count -ne 1 -or -not $registration[0].UninstallString) { throw 'Windows uninstall registration missing.' }
@@ -38,7 +39,7 @@ Copy-Item $package[0].FullName $originalPackage -Force
 $badResult = Join-Path $log 'corrupt.json'
 $p = Start-Process $exe -ArgumentList @('--ci-update-apply', ('"' + $fixture + '"'), ('"' + $badResult + '"')) -PassThru -Wait
 if ($p.ExitCode -ne 1 -or -not (Test-Path $badResult)) { throw 'Corrupt update was not rejected.' }
-if (-not ((Get-Content $badResult -Raw | ConvertFrom-Json).Error)) { throw 'Expected checksum rejection error.' }
+if ((Get-Content $badResult -Raw | ConvertFrom-Json).Error -notmatch 'ChecksumFailedException') { throw 'Expected package checksum rejection, not another error.' }
 Copy-Item $originalPackage $package[0].FullName -Force
 if ((Get-FileHash $package[0].FullName).Hash -ne $originalHash) { throw 'Fixture restore failed.' }
 $goodResult = Join-Path $log 'updated.json'
@@ -55,7 +56,10 @@ New-Item -Path (Join-Path $data 'external-link') -ItemType Junction -Value $outs
 $update = Join-Path $install 'Update.exe'
 $p = Start-Process $update -ArgumentList @('uninstall', '--silent') -PassThru -Wait
 if ($p.ExitCode -ne 0) { throw "Uninstall failed: $($p.ExitCode)" }
-Wait-For { -not (Test-Path (Join-Path $install 'current')) } 'installed files removed'
+Wait-For { -not (Test-Path $install) } 'entire install directory removed'
+if (Test-Path (Join-Path $env:TEMP 'velopack_GuideDeck.Desktop')) { throw 'Updater temporary directory left behind.' }
+$links = @(Get-ChildItem (Join-Path $env:APPDATA 'Microsoft/Windows/Start Menu/Programs') -Filter '*.lnk' -Recurse | Where-Object { $_.BaseName -eq 'GuideDeck' })
+if ($links.Count -ne 0) { throw 'Uninstall left Start menu shortcut behind.' }
 if (Test-Path $data) { throw 'Uninstall left GuideDeck data behind.' }
 if (-not (Test-Path (Join-Path $outside 'keep.txt'))) { throw 'Cleanup traversed an external junction.' }
 $remaining = @(Get-ChildItem $registry | ForEach-Object { Get-ItemProperty $_.PSPath } | Where-Object { $_.DisplayName -eq 'GuideDeck' })

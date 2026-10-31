@@ -11,9 +11,11 @@ try {
         if (Test-Path $errorFile) { Get-Content $errorFile }
         throw 'UI capture failed.'
     }
+    foreach ($page in @('desktop','updates')) {
     foreach ($theme in @('light','dark','light-compact','dark-compact')) {
-        $file = Join-Path $output "desktop-$theme.png"
+        $file = Join-Path $output "$page-$theme.png"
         if (-not (Test-Path $file) -or (Get-Item $file).Length -lt 1000) { throw "Missing rendered preview: $theme" }
+    }
     }
     Write-Output 'PASS actual WPF light/dark rendering; appearance settings unchanged.'
 } finally { if (-not $app.HasExited) { $app.Kill() } }

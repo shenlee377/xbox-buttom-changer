@@ -74,8 +74,8 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p docs/images
-          cp previews/desktop-*.png docs/images/
-          git add docs/images/desktop-*.png
+          cp previews/ui-previews/desktop-*.png previews/ui-previews/updates-*.png docs/images/
+          git add docs/images/desktop-*.png docs/images/updates-*.png
           if ! git diff --cached --quiet; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

@@ -16,6 +16,7 @@ jobs:
           dotnet-version: '8.0.x'
       - run: dotnet run --project tests/GuideDeck.Tests -c Release
       - run: python3 scripts/check-theme-contrast.py
+      - run: python3 -B scripts/test-release-validation.py
   windows:
     runs-on: windows-2022
     steps:
@@ -58,10 +59,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: GuideDeck-windows
+          retention-days: 7
           path: |
             artifacts/GuideDeck-windows-x64.zip
             artifacts/SHA256SUMS.txt
-            artifacts/installer/*
+            artifacts/installer/*Setup.exe
+            artifacts/installer/*-full.nupkg
+            artifacts/installer/releases.win-x64.json
             src/GuideDeck.GameBar/AppPackages/**
           if-no-files-found: warn
       - name: Upload actual UI renders
@@ -69,6 +73,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: GuideDeck-ui-previews
+          retention-days: 7
           path: |
             artifacts/ui-previews/
             artifacts/update-test/

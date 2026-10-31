@@ -33,10 +33,12 @@ def prepare(source: Path, output: Path, sha: str, run_id: str, version: str) -> 
     shutil.copyfile(setup[0], output / "GuideDeck-Setup.exe")
     feed = json.loads(feed_path.read_text(encoding="utf-8-sig"))
     assets = feed.get("Assets", [])
-    if not assets:
-        raise ValueError("Empty updater feed")
+    if len(assets) != 1:
+        raise ValueError("Expected exactly one full release in this build feed")
     update_names = ["GuideDeck-Setup.exe", feed_path.name]
     for asset in assets:
+        if asset.get("Type") not in ("Full", 1):
+            raise ValueError("Expected a full update package")
         name = asset["FileName"]
         if Path(name).name != name or not re.fullmatch(r"GuideDeck\.Desktop-.*-full\.nupkg", name):
             raise ValueError("Unexpected update package path")

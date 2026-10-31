@@ -1,5 +1,6 @@
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -16,10 +17,15 @@ internal static class UiCapture
         Directory.CreateDirectory(directory);
         var themes = ((App)Application.Current).Themes;
         var original = themes.Mode;
+        var tabs = (TabControl)window.FindName("MainTabs");
+        var selected = tabs.SelectedIndex;
         var path = Path.Combine(DesktopStorage.Root, "appearance.json");
         var before = File.Exists(path) ? File.ReadAllBytes(path) : null;
         try
         {
+            foreach (var page in new[] {"desktop", "updates"})
+            {
+            tabs.SelectedIndex = page == "desktop" ? 0 : tabs.Items.Count - 1;
             foreach (var compact in new[] {false, true})
             {
                 window.Width = compact ? 780 : 1140;
@@ -45,12 +51,13 @@ internal static class UiCapture
                     }
                     var encoder = new PngBitmapEncoder(); encoder.Frames.Add(BitmapFrame.Create(bitmap));
                     var suffix = compact ? "-compact" : "";
-                    using var file = File.Create(Path.Combine(directory, "desktop-" + mode.ToString().ToLowerInvariant() + suffix + ".png"));
+                    using var file = File.Create(Path.Combine(directory, page + "-" + mode.ToString().ToLowerInvariant() + suffix + ".png"));
                     encoder.Save(file);
                 }
             }
+            }
         }
-        finally { themes.SetMode(original, persist: false); }
+        finally { tabs.SelectedIndex = selected; themes.SetMode(original, persist: false); }
         var after = File.Exists(path) ? File.ReadAllBytes(path) : null;
         if ((before == null) != (after == null) || (before != null && !before.SequenceEqual(after!)))
             throw new InvalidOperationException("Capturing previews must not modify appearance preferences.");
