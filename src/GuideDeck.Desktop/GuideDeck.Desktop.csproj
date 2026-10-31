@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup><Version>0.4.1</Version><ApplicationIcon>Assets/GuideDeck.ico</ApplicationIcon></PropertyGroup>
+  <PropertyGroup><Version>0.5.0</Version><ApplicationIcon>Assets/GuideDeck.ico</ApplicationIcon><StartupObject>GuideDeck.Desktop.App</StartupObject></PropertyGroup>
   <PropertyGroup><OutputType>WinExe</OutputType><TargetFramework>net8.0-windows</TargetFramework><UseWPF>true</UseWPF><EnableWindowsTargeting>true</EnableWindowsTargeting><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><AssemblyName>GuideDeck</AssemblyName></PropertyGroup>
   <ItemGroup><ProjectReference Include="../GuideDeck.Core/GuideDeck.Core.csproj" /></ItemGroup>
+  <ItemGroup><ApplicationDefinition Remove="App.xaml"/><Page Include="App.xaml"/><PackageReference Include="Velopack" Version="1.2.161"/></ItemGroup>
   <ItemGroup><Resource Include="Assets/GuideDeck.ico"/><Resource Include="Assets/GuideDeck.png"/></ItemGroup>
 </Project>

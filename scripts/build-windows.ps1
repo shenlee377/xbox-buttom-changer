@@ -22,6 +22,7 @@ try {
         }
     }
     Compress-Archive -Path artifacts/windows-x64/* -DestinationPath artifacts/GuideDeck-windows-x64.zip -Force
+    ./scripts/pack-installer.ps1
     if ($IncludeGameBar) {
         $companion = Join-Path $repo 'src/GuideDeck.GameBar/Companion'
         if (Test-Path $companion) { Remove-Item $companion -Recurse -Force }

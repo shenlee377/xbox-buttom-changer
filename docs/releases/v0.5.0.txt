@@ -1,0 +1,9 @@
+本版改以 GuideDeck-Setup.exe 安裝版為主要下載：
+- 安裝到目前使用者，登錄 Windows「已安裝的應用程式」，不要求管理員。
+- app「更新與安裝」直接檢查／下載 GitHub Releases，校驗後由玩家確認重啟。
+- 解除安裝清除程式、更新套件、捷徑及本機 GuideDeck 資料。請先復原 Steam 修改或匯出備份。
+- portable／舊腳本版本首次需安裝一次；Game Bar MSIX 更新獨立處理。
+- Game Bar widget 接入新版錄影 API，提供開始、停止與最近 30 秒操作，保留原生焦點導覽。
+  不啟用背景錄製／麥克風，舊宿主或無遊戲目標顯示不可用；實機擷取尚待驗收。
+- 新增更新／清理設計、學生／開源資源規劃，以及 OBS、Core Audio、Playnite 等 API 評估。
+仍未實作多來源 Guide 攔截、其他公司 HUD 分派或通用手把滑鼠模式。

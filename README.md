@@ -37,7 +37,9 @@ Valve 的 [2025-09-09 更新](https://steamcommunity.com/games/593110/announceme
 - 偵測設定漂移、撤銷過期預覽、保存與匯出有範圍的人工驗收紀錄。
 - Game Bar widget 可使用同一套 mapping 規則、開啟同套件桌面管理器、查看最近檢查摘要。
 
-**下一階段研究：統一內嵌介面與手把操作**
+**統一內嵌介面與手把操作**
+
+0.5.0 先在開發版 Game Bar widget 接入原生錄影 API：開始、停止與儲存最近片段。使用自己的可聚焦按鈕，無須向遊戲模擬快捷鍵；依宿主版本與背景擷取能力啟用。未部署 widget 時桌面安裝版不會顯示遊戲內錄影控制。實機遊戲擷取與手把操作仍待驗收。
 
 [架構與手把操作提案](docs/OVERLAY-HUB-DESIGN.txt) · [Steam API 調查](docs/research/STEAM-API-REVIEW.txt) · [第三方來源能力研究](docs/research/overlay-providers.research.json)
 
@@ -52,6 +54,14 @@ Valve 的 [2025-09-09 更新](https://steamcommunity.com/games/593110/announceme
 | ![GuideDeck 淺色介面](docs/images/desktop-light.png) | ![GuideDeck 深色介面](docs/images/desktop-dark.png) |
 
 **取得與安裝**
+
+預設改用 **[GuideDeck-Setup.exe 安裝版](https://github.com/shenlee377/xbox-buttom-changer/releases/download/v0.5.0/GuideDeck-Setup.exe)**：登錄 Windows 已安裝的應用程式，並在 app「更新與安裝」直接檢查、下載與確認重啟。更新透過 GitHub Releases + Velopack，不需要 GitHub 帳號。首次從舊版升級需安裝一次。
+
+從 Windows 設定解除安裝會清除程式與本機 GuideDeck 資料（**包含備份／觀察**）；請先還原需要復原的 Steam 修改或匯出備份。自行匯出、舊免安裝副本、另行部署的 widget 與 Windows 記錄分別管理。
+
+[更新與解除安裝規則](docs/UPDATING-AND-UNINSTALL.txt) · [學生／開源成本規劃](docs/research/STUDENT-RESOURCES.txt) · [更多遊戲 API 評估](docs/research/GAMING-API-OPPORTUNITIES.txt)
+
+以下 ZIP／腳本保留為選用方式，不提供新安裝版的 app 內更新：
 
 從 [Releases](https://github.com/shenlee377/xbox-buttom-changer/releases) 下載 `GuideDeck-windows-x64.zip`，解壓縮後執行 `GuideDeck.exe`。不需要另外安裝 .NET runtime。
 

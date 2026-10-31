@@ -1,5 +1,5 @@
-GuideDeck 0.4.1 — Xbox Button Changer
-2026-10-30
+GuideDeck 0.5.0 — Xbox Button Changer
+2026-10-31
 ============================================================
 
 目的與目前邊界
@@ -14,6 +14,14 @@ GuideDeck 0.4.1 — Xbox Button Changer
 
 下載與安裝
 https://github.com/shenlee377/xbox-buttom-changer/releases
+
+建議安裝：下載 GuideDeck-Setup.exe。Windows 設定可解除安裝。
+app「更新與安裝」直接從 GitHub Releases 檢查／下載，由使用者確認重啟。
+安裝版預設 %LOCALAPPDATA%\GuideDeck.Desktop。解除安裝會清除本機
+GuideDeck 資料（含備份／觀察）；需要還原 Steam 修改時請先在 app 操作。
+自行匯出、舊版副本、另部署的 widget 與 Windows 記錄不在清理範圍。
+舊版首次需安裝 Setup；下方腳本是歷史／選用方式，不具新 updater。
+更多：docs/UPDATING-AND-UNINSTALL.txt。
 
 先修正大螢幕啟動：
   在「Steam Guide」頁開啟 Steam → 設定 → 控制器（部分版本在進階設定）。

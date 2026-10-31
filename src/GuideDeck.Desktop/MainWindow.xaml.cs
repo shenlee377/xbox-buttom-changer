@@ -30,6 +30,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        InitializeUpdates();
         var themes = ((App)Application.Current).Themes;
         themes.Attach(this);
         themes.Changed += UpdateAppearance;
@@ -94,7 +95,7 @@ public partial class MainWindow : Window
         busy = true; MainTabs.IsEnabled = false;
         try { await action(); }
         catch (Exception e) { Status.Text = "未完成：" + e.Message; }
-        finally { busy = false; MainTabs.IsEnabled = true; UpdateApply(); UpdateGuideApply(); }
+        finally { busy = false; MainTabs.IsEnabled = true; UpdateApply(); UpdateGuideApply(); RefreshUpdateControls(); }
     }
     private void ClearPreview()
     {

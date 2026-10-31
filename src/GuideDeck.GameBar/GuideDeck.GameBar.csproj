@@ -13,6 +13,7 @@
  <ItemGroup>
   <ApplicationDefinition Include="App.xaml"/><Page Include="MainPage.xaml"/>
   <Compile Include="App.xaml.cs"><DependentUpon>App.xaml</DependentUpon></Compile>
+  <Compile Include="MainPage.Recording.cs"/>
   <Compile Include="MainPage.xaml.cs"><DependentUpon>MainPage.xaml</DependentUpon></Compile>
   <Compile Include="..\GuideDeck.Core\Mapping.cs"><Link>Shared\Mapping.cs</Link></Compile>
   <Compile Include="..\GuideDeck.Core\ValidationContract.cs"><Link>Shared\ValidationContract.cs</Link></Compile>
@@ -22,7 +23,7 @@
   <Content Include="GameBar\Readme.txt"/>
   <Content Include="Companion\**\*"/>
   <SDKReference Include="WindowsDesktop, Version=$(TargetPlatformVersion)"/>
-  <PackageReference Include="Microsoft.Gaming.XboxGameBar" Version="7.2.240903001"/>
+  <PackageReference Include="Microsoft.Gaming.XboxGameBar" Version="7.3.2607010"/>
   <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.2.14"/>
  </ItemGroup>
  <PropertyGroup><VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">17.0</VisualStudioVersion></PropertyGroup>

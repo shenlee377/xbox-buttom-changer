@@ -50,6 +50,9 @@ jobs:
           ./scripts/Install-GuideDeck.ps1 -ArchivePath artifacts/GuideDeck-windows-x64.zip -ChecksumFile artifacts/SHA256SUMS.txt -SkipShortcut
           ./scripts/Install-GuideDeck.ps1 -ArchivePath artifacts/GuideDeck-windows-x64.zip -ChecksumFile artifacts/SHA256SUMS.txt -SkipShortcut
           ./scripts/Uninstall-GuideDeck.ps1
+      - name: Installed update, restart, corruption rejection and clean uninstall
+        shell: powershell
+        run: ./scripts/test-installed-update.ps1
       - name: Upload Windows build output
         if: always()
         uses: actions/upload-artifact@v4
@@ -58,6 +61,7 @@ jobs:
           path: |
             artifacts/GuideDeck-windows-x64.zip
             artifacts/SHA256SUMS.txt
+            artifacts/installer/*
             src/GuideDeck.GameBar/AppPackages/**
           if-no-files-found: warn
       - name: Upload actual UI renders
@@ -65,5 +69,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: GuideDeck-ui-previews
-          path: artifacts/ui-previews/
+          path: |
+            artifacts/ui-previews/
+            artifacts/update-test/
           if-no-files-found: warn

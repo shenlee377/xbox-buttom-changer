@@ -100,5 +100,5 @@ jobs:
           else
             gh release create "$RELEASE_VERSION" --draft --prerelease --target "$TESTED_SHA" --title "GuideDeck $RELEASE_VERSION — 實驗版" --notes-file release/NOTES.txt
           fi
-          gh release upload "$RELEASE_VERSION" release/GuideDeck.exe release/GuideDeck-windows-x64.zip release/GuideDeck-GameBar-development.zip release/Install-GuideDeck.ps1 release/Uninstall-GuideDeck.ps1 release/GuideDeck-LICENSES.txt release/GuideDeck-icons.zip release/SHA256SUMS.txt --clobber
+          gh release upload "$RELEASE_VERSION" release/GuideDeck-Setup.exe release/releases.win-x64.json release/*-full.nupkg release/GuideDeck.exe release/GuideDeck-windows-x64.zip release/GuideDeck-GameBar-development.zip release/Install-GuideDeck.ps1 release/Uninstall-GuideDeck.ps1 release/GuideDeck-LICENSES.txt release/GuideDeck-icons.zip release/SHA256SUMS.txt --clobber
           gh release edit "$RELEASE_VERSION" --draft=false --prerelease --target "$TESTED_SHA"

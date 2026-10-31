@@ -1,0 +1,77 @@
+GuideDeck 遊戲相關 API 擴充評估
+2026-10-31；「有 SDK」不等於能控制其他遊戲的內嵌畫面。
+============================================================
+
+優先順序：先做手把能完成且有狀態回報的功能，再擴展第三方 HUD。
+每個 adapter 分開宣告呼叫、狀態、手把導覽、返回遊戲、輸入隔離；未知不當成功。
+
+P0 · Microsoft Game Bar 錄影
+API：XboxGameBarWidgetRecordingManager，SDK 7.3.2511061 起；本版固定 7.3.2607010。
+RecordLastAsync、StartRecordingAsync、StopRecordingAsync、RecordingStateChanged。
+價值：把錄影與最近片段做成自己的可聚焦大按鈕，避免打開滑鼠操作的第三方 HUD。
+0.5.0 已接入 API，檢查可用性、顯示結果、序列化操作、卸載 widget 時解除事件。
+不啟用背景緩衝、不改麥克風、不以快捷鍵冒充成功；舊 Game Bar／無遊戲目標
+會拒絕或顯示不可用。這是編譯與防護實作，實機擷取和手把操作仍待驗收。
+API 的 NotSupported／TargetNotAvailable／InProgress 必須明確回報且不盲目重送。
+來源：https://learn.microsoft.com/en-us/xbox/game-bar/api/xgb-widgetrecordingmanager
+
+P1 · OBS Studio WebSocket v5（社群開源，正式公開協定）
+GetRecordStatus、StartRecord／StopRecord、GetReplayBufferStatus／SaveReplayBuffer、
+GetCurrentProgramScene／SetCurrentProgramScene，透過 requestId／結果碼與事件確認。
+預設 OBS WebSocket server port 4455，OBS 28+ 內建；需使用者啟用及驗證配對。
+建議只接 localhost、要求認證、秘密存 Windows Credential Manager／DPAPI，
+不要傳到 Game Bar UWP、JSON 偏好或日誌。UWP 對 loopback 有限制；用 desktop
+broker 經同套件 AppService 提供白名單命令，而非要求玩家加 loopback 豁免。
+價值：遊戲內用手把錄影、保存重播、切換場景，無須操作 OBS 桌面視窗。
+狀態：研究，尚未實作。連線斷開或 request timeout 不能重送 Start/Stop toggle。
+來源：https://github.com/obsproject/obs-websocket/blob/master/docs/generated/protocol.md
+
+P1 · Windows Core Audio
+IMMDeviceEnumerator／IMMNotificationClient 偵測裝置；IAudioSessionManager2 +
+ISimpleAudioVolume 管理音訊 session；IAudioEndpointVolume 明確控制裝置音量。
+價值：遊戲、語音與音樂獨立音量／靜音，介面完全可由自己的手把焦點控制。
+限制：session／PID 可能重建；共享 session 不是單一遊戲的保證。音訊端點靜音
+會影響全系統而不是只 Discord；切換預設裝置的未公開 PolicyConfig 不納入基礎版。
+狀態：研究，尚未實作；先確認 Game Bar 既有 Audio widget 是否已滿足需求。
+來源：https://learn.microsoft.com/en-us/windows/win32/coreaudio/core-audio-interfaces
+
+P1 · Playnite Extensions SDK（社群開源）
+官方外掛生命週期 OnGameStarting／OnGameStarted／OnGameStopped 及遊戲資料可
+作為設定檔切換信號，比只猜 foreground process 更有脈絡。Fullscreen 本身支援手把。
+限制：它是遊戲啟動器，不能把 Fullscreen 當作遊戲內 overlay；外掛在 Playnite
+自己的受支援宿主執行，不能將 .NET 8 desktop DLL 直接塞進其 .NET Framework 外掛。
+建議單獨外掛 + 目前使用者 ACL 的 named pipe broker；驗證來源，不允許任意 shell。
+狀態：研究，尚未實作，不會為按 Guide 自動切出遊戲到另一個大螢幕介面。
+來源：https://api.playnite.link/docs/tutorials/extensions/plugins.html
+https://api.playnite.link/docs/manual/gettingStarted/playniteFullscreenMode.html
+
+P2 · Microsoft GameInput / SDL3
+GameInput v2 的 RegisterSystemButtonCallback + 背景 focus policy 可觀察 Guide／Share；
+回呼是通知，沒有「吞掉全系統事件後只放行某一家」的保證。前景 exclusive policy
+也不是全 API 驅動級隔離。SDL 能統一普通手把輸入，但不能因此壓制 Steam/XInput。
+Game Bar 已提供自己的焦點導覽時不再平行映射 A／B，避免雙重選取和遊戲誤操作。
+安裝版有能力部署 broker，並不代表需要服務、管理員或輸入攔截驅動。
+狀態：研究，尚未實作直接 Guide 路由。
+來源：https://learn.microsoft.com/en-us/gaming/gdk/docs/reference/input/gameinput/interfaces/igameinput/methods/igameinput_registersystembuttoncallback
+https://learn.microsoft.com/en-us/gaming/gdk/docs/reference/input/gameinput/enums/gameinputfocuspolicy
+https://wiki.libsdl.org/SDL3/CategoryGamepad
+
+P2 · Steam / Discord / Epic EOS 等遊戲公司接口
+Steamworks 的 Overlay、文字輸入和 Steam Input API 主要屬於呼叫遊戲／應用的
+Steam context，不能用自造 AppID 當跨遊戲全域遙控器。詳見 STEAM-API-REVIEW.txt。
+Discord Social SDK 服務整合遊戲的社交功能，需應用註冊／授權；不是跨遊戲 HUD
+開關。不得呼叫私有端點、自動化玩家帳號或讀 token。Epic EOS Social Overlay
+也要求整合遊戲與平台登入，Epic Launcher 已安裝不代表 EOS overlay 可用。
+NVIDIA/AMD/EA/Ubisoft/GOG 快捷鍵候選與手把能力見 overlay-providers.research.json；
+沒有公開通用控制 API 的部分保留為條件式候選，不能展示「全面支援」。
+來源：https://partner.steamgames.com/doc/api/ISteamFriends#ActivateGameOverlay
+https://discord.com/developers/docs/slayer-sdk/getting_started.html
+https://dev.epicgames.com/docs/epic-account-services/social-overlay-overview
+
+統一管理的產品界線
+- 先整合可讀狀態、有明確動作的本機 API，讓玩家留在自己的手把快捷面板。
+- 第三方 HUD 開啟與能否手把操作獨立標示；沒有輸入隔離就不啟用通用滑鼠模式。
+- 不注入遊戲／修改記憶體／私有 CEF Debugging／虛擬 HID／關閉反作弊。
+- API broker 僅接受白名單動作，不讓 provider manifest 指定任意 EXE／DLL／腳本。
+- 背景或全螢幕、HDR、多顯示器、焦點切換、UIPI、裝置斷線和反作弊遊戲逐項實測。
+- 多來源真正路由、OBS、音訊與 Playnite adapter 是後續開發，0.5.0 不聲稱已完成。

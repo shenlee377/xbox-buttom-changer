@@ -4,7 +4,7 @@
  xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
  xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities" IgnorableNamespaces="uap uap3 desktop rescap">
- <Identity Name="GuideDeck.Prototype" Publisher="CN=GuideDeckDevelopment" Version="0.4.1.0" ProcessorArchitecture="x64"/>
+ <Identity Name="GuideDeck.Prototype" Publisher="CN=GuideDeckDevelopment" Version="0.5.0.0" ProcessorArchitecture="x64"/>
  <Properties><DisplayName>GuideDeck Prototype</DisplayName><PublisherDisplayName>GuideDeck Development</PublisherDisplayName><Logo>Assets\StoreLogo.png</Logo></Properties>
  <Dependencies><TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.19041.0" MaxVersionTested="10.0.19041.0"/></Dependencies>
  <Resources><Resource Language="zh-TW"/><Resource Language="en-US"/></Resources>
@@ -44,6 +44,9 @@
         <Interface Name="Microsoft.Gaming.XboxGameBar.Private.IXboxGameBarWidgetPrivate2" InterfaceId="B2F7DB8C-7540-48DA-9B46-4E60CE0D9DEB" />
         <Interface Name="Microsoft.Gaming.XboxGameBar.Private.IXboxGameBarWidgetPrivate3" InterfaceId="4FB89FB6-7CB8-489D-8408-2269E6C733A1" />
         <Interface Name="Microsoft.Gaming.XboxGameBar.Private.IXboxGameBarWidgetPrivate4" InterfaceId="5638D65A-3733-48CC-90E5-984688D62786" />
+        <Interface Name="Microsoft.Gaming.XboxGameBar.Private.IXboxGameBarWidgetRecordingHost" InterfaceId="E85FD1C6-2867-44C3-B00A-AEEBBA76E438" />
+        <Interface Name="Microsoft.Gaming.XboxGameBar.Private.IXboxGameBarWidgetRecordingHost2" InterfaceId="B33C864A-F353-43AA-B518-AF5DB4FB6B4B" />
+        <Interface Name="Microsoft.Gaming.XboxGameBar.Private.IXboxGameBarWidgetRecordingResultSummaryPrivate" InterfaceId="7D701751-288D-4C6C-A466-97FBA0D21111" />
       </ProxyStub>
     </Extension></Extensions>
  <Capabilities><rescap:Capability Name="runFullTrust"/></Capabilities>

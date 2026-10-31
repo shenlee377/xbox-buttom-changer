@@ -1,0 +1,38 @@
+GuideDeck 的學生／開源成本規劃
+查核日期：2026-10-31；優惠會變動，以兌換時官方條款為準。
+============================================================
+
+建議現在維持每月零固定成本：公開 GitHub repository + GitHub-hosted Actions
++ Releases + Velopack（MIT）。不需要 GitHub Packages、私有更新伺服器、
+付費資料庫或玩家登入。公開 repo 的標準 GitHub-hosted runner 原有免費待遇，
+不是學生認證專屬；Codespaces 也不能替代真實 Windows／手把／反作弊測試。
+
+Student Developer Pack 對此專案較有用的項目
+- GitHub Pro：學生期間免費；利於開發管理，並非公開 Releases 更新的前提。
+- JetBrains：學生訂閱，適合評估 Rider；須遵守教育授權與續期條件。
+- Azure：18+ 官方列 $100 credit；可用於限額 Windows 測試 VM 的實驗。
+  VM/GPU 費用、映像與地區另查，credit 不保證足夠 GPU 或遊戲測試。
+- Sentry：學生方案可評估選擇性錯誤回報。先做好移除遊戲路徑、帳號、
+  Steam 設定等敏感內容；目前未加入 SDK、預設不上傳任何紀錄。
+
+不要因為「有優惠」就增加依賴：BrowserStack 的學生優惠重點是網頁／行動
+測試，無法驗證此 WPF + Game Bar + Xbox 手把組合。域名、雲端 credits
+不是 updater 的必要成本。先留意到期後費率與服務停止時 app 是否仍可使用。
+
+簽章是另一件事
+- SignPath Foundation 提供符合條件的開源專案免費簽章；不是 Student Pack。
+  要申請、符合公開原始碼／建置、2FA 與簽章政策等要求，不能先宣稱已取得。
+- Microsoft Store 的 MSIX 經認證後可由 Store 簽章、更新，適合 Game Bar
+  的長期通路；帳號資格、註冊費／豁免與地區依當時官方規定確認。
+- Azure Artifact Signing 有身分、地區及付費方案限制。學生 Azure credit
+  不等於自動取得簽章資格或免費 code-signing certificate；不先建立付費服務。
+- 自簽開發憑證不等於公開信任的 Authenticode，不能要求玩家停用保護措施。
+
+學生身分與優惠兌換須由帳號持有人在官方網站完成。目前不代交學生證、
+不啟用自動扣費、不替專案申請外部服務、不上傳資料。
+
+來源
+https://education.github.com/pack/
+https://docs.github.com/en/billing/concepts/product-billing/github-actions
+https://signpath.org/terms
+https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/code-signing-options

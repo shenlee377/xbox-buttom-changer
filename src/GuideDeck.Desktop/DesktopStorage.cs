@@ -6,7 +6,9 @@ namespace GuideDeck.Desktop;
 
 internal static class DesktopStorage
 {
-    public static string Root { get; } = ResolveRoot();
+    public static bool IsPackaged { get; private set; }
+    public static string Root { get; }
+    static DesktopStorage() { Root = ResolveRoot(); }
     private static string ResolveRoot()
     {
         uint length = 0;
@@ -14,7 +16,10 @@ internal static class DesktopStorage
         {
             var name = new StringBuilder((int)length);
             if (GetCurrentPackageFamilyName(ref length, name) == 0)
+            {
+                IsPackaged = true;
                 return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Packages", name.ToString(), "LocalState", "GuideDeck");
+            }
         }
         return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GuideDeck");
     }

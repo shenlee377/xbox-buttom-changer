@@ -4,6 +4,18 @@ using System.Text;
 namespace GuideDeck.Desktop;
 public partial class App : Application
 {
+    [STAThread]
+    private static void Main(string[] args)
+    {
+        // Hooks must run before WPF, the single-instance mutex, or settings are opened.
+        if (!DesktopStorage.IsPackaged)
+            Velopack.VelopackApp.Build().SetAutoApplyOnStartup(false)
+                .OnBeforeUninstallFastCallback(_ => InstallationCleanup.RemoveUserData()).Run();
+        if (UpdateProbe.TryRun(args)) return;
+        var app = new App();
+        app.InitializeComponent();
+        app.Run();
+    }
     private Mutex? instance;
     private EventWaitHandle? activation;
     private RegisteredWaitHandle? registration;

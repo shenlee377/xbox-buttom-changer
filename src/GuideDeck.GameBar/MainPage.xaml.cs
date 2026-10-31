@@ -52,6 +52,7 @@ namespace GuideDeck.GameBar
             ApplyAppearance();
             _ = ReadAppearance();
             UpdateTimer();
+            InitializeRecording();
         }
         private async void HostThemeChanged(XboxGameBarWidget sender, object args) => await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, ApplyAppearance);
         private async void HighContrastChanged(Windows.UI.ViewManagement.AccessibilitySettings sender, object args) => await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, ApplyAppearance);
@@ -107,6 +108,7 @@ namespace GuideDeck.GameBar
         }
         public void StopMonitor()
         {
+            StopRecordingMonitor();
             timer.Stop();
             if (host != null) { host.VisibleChanged -= HostVisibleChanged; host.RequestedThemeChanged -= HostThemeChanged; }
             accessibility.HighContrastChanged -= HighContrastChanged;

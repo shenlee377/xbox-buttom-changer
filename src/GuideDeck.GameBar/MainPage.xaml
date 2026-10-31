@@ -1,4 +1,4 @@
-<Page x:Class="GuideDeck.GameBar.MainPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="{ThemeResource WidgetBackgroundBrush}">
+<Page XYFocusKeyboardNavigation="Enabled" x:Class="GuideDeck.GameBar.MainPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="{ThemeResource WidgetBackgroundBrush}">
  <Page.Resources><ResourceDictionary>
   <ResourceDictionary.ThemeDictionaries>
    <ResourceDictionary x:Key="Light">
@@ -23,6 +23,8 @@
   </Grid>
   <Pivot x:Name="Sections" Grid.Row="1">
    <PivotItem Header="總覽"><ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel>
+    <Border Style="{StaticResource Card}"><StackPanel Spacing="10"><TextBlock Text="手把快捷操作 · Game Bar 錄影" FontSize="20" FontWeight="SemiBold"/><TextBlock Text="方向鍵選取，A 確認。直接使用 Game Bar API，不向遊戲送出鍵盤快捷鍵。" Foreground="{ThemeResource WidgetMutedBrush}" FontSize="12"/><TextBlock x:Name="RecordingStatus" Text="需要支援新版錄影 API 的 Xbox Game Bar。" AutomationProperties.LiveSetting="Polite"/><Button x:Name="StartRecordingButton" Content="開始錄影" Click="StartRecordingClick" IsEnabled="False" HorizontalAlignment="Stretch"/><Button x:Name="StopRecordingButton" Content="停止並儲存錄影" Click="StopRecordingClick" IsEnabled="False" HorizontalAlignment="Stretch"/><Button x:Name="SaveReplayButton" Content="儲存最近 30 秒" Click="SaveReplayClick" IsEnabled="False" HorizontalAlignment="Stretch"/><Button Content="重新檢查錄影能力" Click="RefreshRecordingClick"/><TextBlock Text="不會自動啟用背景錄製或麥克風。結束 widget 不會自動停止其他程式發起的錄影。擷取範圍、可用性與儲存位置由 Game Bar 決定。" Foreground="{ThemeResource WidgetMutedBrush}" FontSize="12"/></StackPanel></Border>
+
     <Border Style="{StaticResource Card}"><StackPanel Spacing="12"><TextBlock Text="保留 Game Bar 原生入口" FontSize="20" FontWeight="SemiBold"/><TextBlock x:Name="Summary" Text="尚未取得桌面管理器的檢查摘要。" Foreground="{ThemeResource WidgetMutedBrush}"/><Button Content="開啟桌面管理器" Style="{StaticResource PrimaryButton}" Click="OpenManager"/><Button Content="更新檢查摘要" Click="RefreshSummary"/><TextBlock Text="開啟桌面視窗可能切出遊戲。摘要超過 30 秒會標示過期，不代表即時攔截狀態。" FontSize="12" Foreground="{ThemeResource WidgetMutedBrush}"/></StackPanel></Border>
     <Border Style="{StaticResource Card}"><StackPanel Spacing="10"><TextBlock Text="下一步" FontSize="17" FontWeight="SemiBold"/><TextBlock Text="01　開啟桌面管理器的「Steam Guide」&#10;02　關閉 Steam 聚焦與導覽鍵組合鍵選項&#10;03　重啟 Steam，分別在背景、前景與遊戲中驗收"/><TextBlock Text="先處理 Steam 原生 Guide 設定。mapping 是進階實驗工具，不能當成已阻擋大螢幕的證明。" FontSize="12" Foreground="{ThemeResource WidgetMutedBrush}"/></StackPanel></Border>
     <Border Background="{ThemeResource WidgetNoticeBrush}" CornerRadius="6" Padding="12"><TextBlock Text="Guide 設定檢查與修正請在桌面管理器操作；widget 不直接修改 Steam 設定。" Foreground="{ThemeResource WidgetNoticeTextBrush}" FontSize="12"/></Border>

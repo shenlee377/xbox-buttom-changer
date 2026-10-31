@@ -1,0 +1,67 @@
+GuideDeck 安裝、app 內更新與解除安裝
+研究／實作日期：2026-10-31；目標版本 0.5.0
+============================================================
+
+選擇 GitHub Releases + Velopack 1.2.161，不以 GitHub Packages 發送終端使用者更新。
+Packages 適合 NuGet/npm/容器等開發套件，不能直接變成 Windows 桌面更新服務；
+部分 registry 即使讀取公開套件也需要驗證。玩家不應提供 PAT。
+公開 Releases 可匿名提供 installer、版本 feed 與更新包，不需要另租服務器。
+
+主要下載：GuideDeck-Setup.exe（目前使用者、x64、自含 .NET）。
+安裝根目錄預設 %LOCALAPPDATA%\GuideDeck.Desktop，與既有資料
+%LOCALAPPDATA%\GuideDeck 分開，避免更新替換程式時丟失備份。
+Windows「設定 → 應用程式 → 已安裝的應用程式」會登錄 GuideDeck。
+免安裝 ZIP／EXE 仍提供，但不假裝具備已安裝 updater 的能力。
+舊版首次手動安裝 Setup 一次；舊的 Programs\GuideDeck 副本需用舊移除腳本清除。
+不要從舊版解除安裝腳本推論新安裝器的清理範圍。
+
+更新流程
+1. 使用者開啟「更新與安裝」並按檢查；啟動 app 不會自動查詢網路。
+2. 固定公開 repo，匿名 GithubSource，包含目前的實驗版；win-x64 channel。
+   版本只能前進，不允許降版。GitHub API 共享 IP 額度約每小時 60 次，
+   UI 至少間隔一分鐘；網路錯誤保留現有版本，不提示假裝已是最新版。
+3. 顯示版本與大小，再下載；可取消。Velopack 校驗套件完整性。
+4. 完成下載後等待使用者確認「重啟並更新」。啟動時自動套用已明確停用。
+   提醒先保存人工觀察；不強制關閉遊戲／Steam，不在遊戲進行中默默重啟。
+5. 若程式檔被鎖定，Velopack 可提示重試／取消；不要同意終止遊戲或防毒。
+
+發版流程
+- 固定 CLI/SDK 1.2.161；同一次 Windows CI 建置 portable、Setup 與 full nupkg。
+- CI 安裝真實 Setup、確認 Windows 登錄、拒絕損壞套件、更新到本地 0.5.1
+  測試產物並重新啟動、確認資料保留，最後測試完整解除安裝。
+  測試用未來版不會成為公開 release 資產。
+- 已驗證 CI 產物經 prepare-release.py 核對 feed 身分、版本、大小及 SHA-256。
+- 公開發佈 GuideDeck-Setup.exe、releases.win-x64.json、原名 full.nupkg；
+  nupkg 檔名不能任意改名，否則 feed 對不上。全部先上傳 draft，再一起公開。
+- Release feed 與檔案依 HTTPS + repository 權限提供信任；checksum 不是
+  Authenticode 簽章，也不能防範有權改寫同一 repo 的攻擊者。現階段未簽章。
+- 不把 GitHub token、簽章私鑰、學生服務憑證或使用者密碼打包進程式。
+
+解除安裝
+- Velopack 移除整個安裝目錄、更新套件、暫存工作目錄、指向此目錄的捷徑
+  和 Windows 解除安裝登錄。
+- 明確 uninstall hook 清除本機 GuideDeck 資料，包括偏好、摘要、備份與觀察。
+  升級不呼叫這段清理。不跟隨資料目錄中的 junction／符號連結刪除外部目標。
+- UI 和發行說明先提醒：需復原 Steam 修改時，先在 app 內還原或匯出備份。
+  解除安裝不自動改 Steam，不會為了清理而關閉 Steam 或還原過期設定。
+- 已匯出的檔案、下載的 Setup、舊免安裝副本、另行部署的 Game Bar MSIX、
+  遊戲／錄影片段與 Windows 自己保留的事件記錄不由本程式刪除。
+- 權限、磁碟損壞或其他程序鎖住資料可能阻礙清理；不能承諾任何環境零殘留。
+  以 CI 檢查可控制的程式、資料、登錄、捷徑與暫存範圍，不清理共用系統記錄。
+
+Game Bar MSIX
+桌面 Setup 不會自動安裝 unsigned Game Bar 開發套件。套件內 full-trust 管理器
+停用 Velopack 更新；必須更新整個 MSIX，以免 UWP／companion 版本分裂。
+未來正式簽章後可用 .appinstaller + GitHub-hosted HTTPS 更新或 Microsoft Store。
+同一 Publisher/Identity、遞增版本、正確信任鏈都是必要條件。不得自動信任
+開發憑證、停用 SmartScreen、開啟開發者模式或繞過企業政策。
+
+主要來源
+https://docs.github.com/en/packages/learn-github-packages/introduction-to-github-packages
+https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-nuget-registry
+https://docs.velopack.io/getting-started/csharp
+https://docs.velopack.io/integrating/update-sources
+https://docs.velopack.io/integrating/uninstalling
+https://docs.velopack.io/integrating/hooks
+https://docs.velopack.io/packaging/operating-systems/windows
+https://learn.microsoft.com/en-us/windows/msix/app-installer/auto-update-and-repair--overview
