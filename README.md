@@ -37,6 +37,12 @@ Valve 的 [2025-09-09 更新](https://steamcommunity.com/games/593110/announceme
 - 偵測設定漂移、撤銷過期預覽、保存與匯出有範圍的人工驗收紀錄。
 - Game Bar widget 可使用同一套 mapping 規則、開啟同套件桌面管理器、查看最近檢查摘要。
 
+**下一階段研究：統一內嵌介面與手把操作**
+
+[架構與手把操作提案](docs/OVERLAY-HUB-DESIGN.txt) · [Steam API 調查](docs/research/STEAM-API-REVIEW.txt) · [第三方來源能力研究](docs/research/overlay-providers.research.json)
+
+重點是分開驗證「能呼叫、能用手把操作、能返回遊戲、能排除輸入競爭」，並優先提供可直接用手把完成的功能面板。這些是後續設計與研究，**0.4.1 尚未加入多來源分派或通用手把滑鼠模式**。
+
 **實際介面預覽**
 
 以下圖片來自 0.4.1 已通過驗證的 Windows WPF 程式渲染，並非概念稿。

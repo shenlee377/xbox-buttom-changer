@@ -1,0 +1,278 @@
+{
+  "schemaVersion": 1,
+  "purpose": "research-catalog-not-runtime-configuration",
+  "reviewDate": "2026-10-31",
+  "timezone": "Asia/Taipei",
+  "currentAppRelease": "0.4.1",
+  "invariants": [
+    "Documented shortcut does not establish programmatic activation success.",
+    "Can activate does not imply can navigate or close with a controller.",
+    "API and overlay status are scoped to the relevant application context.",
+    "Missing/unknown input isolation stays unknown.",
+    "Do not automatically replay a toggle command.",
+    "Do not enable background recording or the microphone implicitly."
+  ],
+  "providers": [
+    {
+      "id": "gamebar-hub",
+      "name": "GuideDeck in Game Bar",
+      "surface": "game-bar-widget",
+      "activationResearch": "native-sdk-or-host",
+      "documentedShortcut": null,
+      "nativeShortcutMustBeConfirmed": true,
+      "navigationEvidence": "host-gamepad-navigation-documented",
+      "runtimeIntegration": "existing-widget-runtime-unverified",
+      "runtimeVerification": "not-tested",
+      "nativeGuideSuppression": "not-provided-by-this-research-entry",
+      "visibilityObservation": "unknown",
+      "gamepadWorkflowVerified": false,
+      "notes": "Existing widget builds; actual gamepad interaction remains untested. WidgetControl controls own-package widgets, not arbitrary overlays or the complete shell.",
+      "sources": [
+        "https://learn.microsoft.com/en-us/xbox/game-bar/designguide/widgetui",
+        "https://learn.microsoft.com/en-us/xbox/game-bar/api/xgb-widgetcontrol"
+      ],
+      "recordingUpgrade": {
+        "projectSdk": "7.2.240903001",
+        "introducedIn": "7.3.2511061",
+        "availablePackageObserved": "7.3.2607010",
+        "source": "https://learn.microsoft.com/en-us/xbox/game-bar/api/xgb-widgetrecordingmanager",
+        "state": "requires-upgrade-build-and-runtime-gating"
+      }
+    },
+    {
+      "id": "steam-game-overlay",
+      "name": "Steam game overlay",
+      "surface": "in-game-overlay",
+      "activationResearch": "documented-shortcut-candidate",
+      "documentedShortcut": [
+        "Shift",
+        "Tab"
+      ],
+      "nativeShortcutMustBeConfirmed": true,
+      "navigationEvidence": "variant-dependent-requires-gamepad-overlay-validation",
+      "runtimeIntegration": "not-implemented",
+      "runtimeVerification": "not-tested",
+      "nativeGuideSuppression": "not-provided-by-this-research-entry",
+      "visibilityObservation": "unknown",
+      "gamepadWorkflowVerified": false,
+      "notes": "Steamworks public overlay APIs require caller app context. Big Picture-style in-game overlay and desktop Big Picture client are different targets. Existing Guide Boolean settings adapter does not prove exclusive routing.",
+      "sources": [
+        "https://partner.steamgames.com/doc/features/overlay",
+        "https://partner.steamgames.com/doc/api/ISteamFriends#ActivateGameOverlay",
+        "https://partner.steamgames.com/doc/api/ISteamUtils#IsSteamInBigPictureMode"
+      ],
+      "settingsAdapter": "existing-limited-Boolean-guide-adapter",
+      "publicSdkCrossProcessActivation": "not-established",
+      "potentialShortcutCollisionGroup": "shift-tab"
+    },
+    {
+      "id": "steam-big-picture-client",
+      "name": "Steam Big Picture client",
+      "surface": "launcher-ui",
+      "activationResearch": "client-protocol-candidate-not-runtime-verified",
+      "documentedShortcut": null,
+      "nativeShortcutMustBeConfirmed": true,
+      "navigationEvidence": "native-gamepad-navigation-documented",
+      "runtimeIntegration": "not-implemented",
+      "runtimeVerification": "not-tested",
+      "nativeGuideSuppression": "not-provided-by-this-research-entry",
+      "visibilityObservation": "unknown",
+      "gamepadWorkflowVerified": false,
+      "notes": "Explicit opt-in launcher destination only. Never silently open as fallback for a failed game-overlay request. URI/client endpoints still require current Windows runtime validation.",
+      "sources": [
+        "https://help.steampowered.com/en/faqs/view/3725-76D3-3F31-FB63"
+      ]
+    },
+    {
+      "id": "nvidia-overlay",
+      "name": "NVIDIA Overlay",
+      "surface": "vendor-overlay",
+      "activationResearch": "documented-shortcut-candidate",
+      "documentedShortcut": [
+        "Alt",
+        "Z"
+      ],
+      "nativeShortcutMustBeConfirmed": true,
+      "navigationEvidence": "not-established-by-reviewed-sources",
+      "runtimeIntegration": "not-implemented",
+      "runtimeVerification": "not-tested",
+      "nativeGuideSuppression": "not-provided-by-this-research-entry",
+      "visibilityObservation": "unknown",
+      "gamepadWorkflowVerified": false,
+      "notes": "Vendor documents hotkey customization. Hardware, enabled overlay and actual local binding must be checked. Screenshot Alt+F1 and Instant Replay Alt+Shift+F10 are documented action candidates, not proof of gamepad-navigation support.",
+      "sources": [
+        "https://www.nvidia.com/en-us/geforce/news/nvidia-app-download-and-features/"
+      ],
+      "quickActionCandidates": [
+        {
+          "action": "screenshot",
+          "documentedShortcut": [
+            "Alt",
+            "F1"
+          ]
+        },
+        {
+          "action": "save-instant-replay",
+          "documentedShortcut": [
+            "Alt",
+            "Shift",
+            "F10"
+          ],
+          "requiresExistingRollingBuffer": true
+        }
+      ]
+    },
+    {
+      "id": "amd-overlay",
+      "name": "AMD Software overlay",
+      "surface": "vendor-overlay",
+      "activationResearch": "documented-shortcut-candidate",
+      "documentedShortcut": [
+        "Alt",
+        "R"
+      ],
+      "nativeShortcutMustBeConfirmed": true,
+      "navigationEvidence": "not-established-by-reviewed-sources",
+      "runtimeIntegration": "not-implemented",
+      "runtimeVerification": "not-tested",
+      "nativeGuideSuppression": "not-provided-by-this-research-entry",
+      "visibilityObservation": "unknown",
+      "gamepadWorkflowVerified": false,
+      "notes": "Shortcut is a documented vendor-version example; this local AMD driver version and its binding still need confirmation. Do not confuse full overlay with the separate metrics display.",
+      "sources": [
+        "https://www.amd.com/en/resources/support-articles/faqs/dh-026.html",
+        "https://www.amd.com/en/resources/support-articles/release-notes/RN-RAD-WIN-24-9-1.html"
+      ]
+    },
+    {
+      "id": "discord-overlay",
+      "name": "Discord Game Overlay",
+      "surface": "in-game-overlay",
+      "activationResearch": "documented-shortcut-candidate",
+      "documentedShortcut": [
+        "Shift",
+        "OEM-backtick"
+      ],
+      "nativeShortcutMustBeConfirmed": true,
+      "navigationEvidence": "not-established-by-reviewed-sources",
+      "runtimeIntegration": "not-implemented",
+      "runtimeVerification": "not-tested",
+      "nativeGuideSuppression": "not-provided-by-this-research-entry",
+      "visibilityObservation": "unknown",
+      "gamepadWorkflowVerified": false,
+      "notes": "Verify actual keybind and keyboard layout. Game, window/display mode and Discord overlay generation matter. Do not infer full gamepad control from opening it.",
+      "sources": [
+        "https://support.discord.com/hc/en-us/articles/217659737-Game-Overlay-101"
+      ]
+    },
+    {
+      "id": "ubisoft-overlay",
+      "name": "Ubisoft Connect overlay",
+      "surface": "in-game-overlay",
+      "activationResearch": "documented-shortcut-candidate",
+      "documentedShortcut": [
+        "Shift",
+        "F2"
+      ],
+      "nativeShortcutMustBeConfirmed": true,
+      "navigationEvidence": "not-established-by-reviewed-sources",
+      "runtimeIntegration": "not-implemented",
+      "runtimeVerification": "not-tested",
+      "nativeGuideSuppression": "not-provided-by-this-research-entry",
+      "visibilityObservation": "unknown",
+      "gamepadWorkflowVerified": false,
+      "notes": "Only applicable in a supported running game with the vendor overlay available.",
+      "sources": [
+        "https://www.ubisoft.com/en-us/help/article/000103536"
+      ]
+    },
+    {
+      "id": "eos-social-overlay",
+      "name": "Epic Online Services Social Overlay",
+      "surface": "in-game-overlay",
+      "activationResearch": "documented-shortcut-candidate",
+      "documentedShortcut": [
+        "Shift",
+        "F3"
+      ],
+      "nativeShortcutMustBeConfirmed": true,
+      "navigationEvidence": "not-established-by-reviewed-sources",
+      "runtimeIntegration": "not-implemented",
+      "runtimeVerification": "not-tested",
+      "nativeGuideSuppression": "not-provided-by-this-research-entry",
+      "visibilityObservation": "unknown",
+      "gamepadWorkflowVerified": false,
+      "notes": "Game/EOS overlay integration, account and initialization requirements apply. Installing the Epic launcher alone does not imply an overlay in every game.",
+      "sources": [
+        "https://dev.epicgames.com/docs/epic-online-services/accounts-and-social/social-overlay/technical-overview"
+      ]
+    },
+    {
+      "id": "gog-overlay",
+      "name": "GOG GALAXY overlay",
+      "surface": "in-game-overlay",
+      "activationResearch": "documented-shortcut-candidate",
+      "documentedShortcut": [
+        "Shift",
+        "Tab"
+      ],
+      "nativeShortcutMustBeConfirmed": true,
+      "navigationEvidence": "not-established-by-reviewed-sources",
+      "runtimeIntegration": "not-implemented",
+      "runtimeVerification": "not-tested",
+      "nativeGuideSuppression": "not-provided-by-this-research-entry",
+      "visibilityObservation": "unknown",
+      "gamepadWorkflowVerified": false,
+      "notes": "GOG documents launch through logged-in licensed GALAXY client and overlay enabled. Do not forceEnableOverlay or infer availability in arbitrary imported games.",
+      "sources": [
+        "https://docs.gog.com/gc-overlay/"
+      ],
+      "potentialShortcutCollisionGroup": "shift-tab"
+    },
+    {
+      "id": "ea-overlay",
+      "name": "EA overlay",
+      "surface": "in-game-overlay",
+      "activationResearch": "documented-shortcut-candidate",
+      "documentedShortcut": [
+        "Shift",
+        "F1"
+      ],
+      "nativeShortcutMustBeConfirmed": true,
+      "navigationEvidence": "not-established-by-reviewed-sources",
+      "runtimeIntegration": "not-implemented",
+      "runtimeVerification": "not-tested",
+      "nativeGuideSuppression": "not-provided-by-this-research-entry",
+      "visibilityObservation": "unknown",
+      "gamepadWorkflowVerified": false,
+      "notes": "EA support documents this conditionally for games using that overlay binding; not a universal EA client activation API.",
+      "sources": [
+        "https://help.ea.com/en/articles/orders-and-rewards/ea-app-game-download-installation-loading-not-working/"
+      ],
+      "shortcutEvidence": "conditional-per-game",
+      "potentialShortcutCollisionGroup": "shift-f1"
+    },
+    {
+      "id": "playstation-overlay",
+      "name": "PlayStation PC overlay",
+      "surface": "in-game-overlay",
+      "activationResearch": "documented-shortcut-candidate",
+      "documentedShortcut": [
+        "Shift",
+        "F1"
+      ],
+      "nativeShortcutMustBeConfirmed": true,
+      "navigationEvidence": "not-established-by-reviewed-sources",
+      "runtimeIntegration": "not-implemented",
+      "runtimeVerification": "not-tested",
+      "nativeGuideSuppression": "not-provided-by-this-research-entry",
+      "visibilityObservation": "unknown",
+      "gamepadWorkflowVerified": false,
+      "notes": "Applicable PlayStation PC game/account features required. PC overlay gamepad navigation still needs separate verification.",
+      "sources": [
+        "https://www.playstation.com/en-gb/support/games/sign-in-pc/"
+      ],
+      "potentialShortcutCollisionGroup": "shift-f1"
+    }
+  ]
+}

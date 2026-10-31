@@ -1,0 +1,100 @@
+GuideDeck：Steam API 與手把操作研究 — 2026-10-31
+狀態：公開文件研究；沒有安裝／注入 Steam 或遊戲插件，也沒有實機
+Steam SDK 呼叫成功的證據。當前 0.4.1 僅有有限 Guide 設定適配器。
+
+API 與判斷：
+
+ISteamFriends::ActivateGameOverlay(dialog)
+  可要求開啟好友、設定等指定頁面。公開簽名沒有目標遊戲 PID。
+  它是 Steamworks 呼叫方上下文的 API，不能僅憑方法存在，就保證
+  獨立 GuideDeck 可操控任意其他遊戲的 overlay。
+  ActivateGameOverlayToStore 的 AppID 是商店頁面的目標，不是指定
+  要控制哪個遊戲的程序。這兩種身分不可混用。
+  適用：正式遊戲／整合插件；獨立工具跨遊戲控制仍須另行證明。
+  https://partner.steamgames.com/doc/api/ISteamFriends#ActivateGameOverlay
+
+SteamAPI_Init / SteamAPI_RunCallbacks
+  Steamworks 初始化要有應用程式 AppID、執行中 Steam 與正確使用者
+  上下文。不能把第三方 wrapper 視為移除上下文限制的方法。
+  不把測試 AppID 或別人的遊戲 AppID 填進工具，當成跨程序遙控方案。
+  https://partner.steamgames.com/doc/sdk/api#initialization_and_shutdown
+
+ISteamInput::ShowBindingPanel(controller)
+  會顯示控制器設定；官方文件明確區分 Big Picture overlay 與桌面
+  模式的彈窗行為。不是開啟任意社群 overlay 的通用替代品，也不該
+  因無法打開 overlay 就自動降級成玩家原本想避免的 Big Picture 彈窗。
+  ISteamInput 的裝置、action origins 與 glyph 可用於自己的正式整合，
+  不當成全系統的 Guide 攔截權限。
+  https://partner.steamgames.com/doc/api/ISteamInput#ShowBindingPanel
+
+ISteamUtils::IsOverlayEnabled / IsSteamInBigPictureMode
+  可在有效的呼叫方上下文查詢狀態，不等於獨立背景工具已讀到另一個
+  遊戲的狀態。後者還有 application type 與啟動上下文限制。
+
+ISteamUtils::ShowGamepadTextInput / ShowFloatingGamepadTextInput
+  可為相應遊戲顯示手把鍵盤。浮動鍵盤以遊戲視窗座標定位並將鍵輸入
+  送到遊戲，不能推定它是跨程序開啟任意文字欄位的鍵盤服務。
+
+ISteamUtils::SetGameLauncherMode
+  有價值：能讓 Steam Input 替遊戲啟動器把手把輸入轉成鍵鼠。
+  適合我們自己的、具合法 Steam 上下文的啟動器／合作整合。
+  不表示外部 GuideDeck 可以替 NVIDIA／Discord 的所有 HUD 開啟
+  全域手把操作。也不能把接收手把與阻止遊戲收到輸入混為一談。
+  Valve 的 2026-10-13 更新亦記錄過與此 API 有關的虛擬手把暫時
+  卸載／不支援熱插拔遊戲失去輸入的修正。這不是宣稱現行版本仍有
+  該 bug，而是把模式切換與遊戲輸入連續性列入必要驗收。
+  https://steamcommunity.com/app/593110/announcements/
+  上述 Utils API：
+  https://partner.steamgames.com/doc/api/ISteamUtils
+
+ISteamScreenshots::TriggerScreenshot
+  遊戲上下文中的截圖方法；若遊戲接管截圖，還有回呼與遊戲實作的
+  配合。獨立工具可研究經使用者確認的 Steam 截圖熱鍵，不能把
+  TriggerScreenshot 成功返回當成截到了別人的遊戲。
+  https://partner.steamgames.com/doc/features/screenshots
+  https://partner.steamgames.com/doc/api/ISteamScreenshots
+
+Steam client URI / 命令列
+  可作開啟客戶端、設定或啟動遊戲的獨立動作。其顯示在客戶端還是
+  遊戲內，不能靠 URI 名稱猜測。Big Picture 客戶端必須獨立標為
+  啟動器介面，不能冒充遊戲內 overlay。
+  本次 Valve Developer Wiki Steam browser protocol 頁回傳 403，
+  因而不據此宣稱每個 endpoint 都在目前 Windows 版本實機通過。
+  現有 0.4.1 的控制器設定 URI 仍有「未直達時從選單開啟」指引。
+  https://developer.valvesoftware.com/wiki/Steam_browser_protocol
+
+Steam Web API
+  本次未找到可由網路 API 開啟本機任意遊戲 overlay 的公開介面。
+  庫存／社群／商店資料與本機輸入控制是不同能力，不為這項需求
+  要求玩家提供 Web API key，也不承諾其能解決 Guide 歸屬。
+  https://partner.steamgames.com/doc/webapi_overview
+
+Steam private IPC / WebUI APIs
+  客戶端內部 SteamClient.* 物件、private interface 或遠端除錯橋接
+  可以列為實驗研究，不能當成穩定、通用、無維護成本的正式 API。
+  不預設啟用 CEF 遠端除錯，不注入 renderer／遊戲，也不把私有 API
+  的存在寫成支援承諾。正式產品優先原生設定、確認過的快捷鍵與
+  有合作方支援的 IPC。
+
+必須分開驗收的 Steam 介面：
+  Steam 桌面 overlay：能開啟不等於全程可用手把操作。
+  Steam 遊戲內手把／Big Picture overlay：要在該遊戲與客戶端設定
+  下驗證原生導覽與返回。並非要求開桌面 Big Picture 啟動器。
+  Steam Big Picture 客戶端：原生手把導覽的獨立介面，只在玩家明確
+  選它時開啟，不作其他動作失敗後的靜默 fallback。
+
+正式可用的原生遊戲 overlay 熱鍵由玩家 Steam 設定決定，常見
+Shift+Tab 也與 GOG 相同；要在前景遊戲與多 overlay 情境做衝突測試。
+單獨把 Guide 映射成 Shift+Tab 仍不能證明其他響應都被阻止。
+https://partner.steamgames.com/doc/features/overlay
+https://partner.steamgames.com/doc/features/steam_controller/getting_started_for_players
+
+下一步具體實驗（尚未執行）：
+1. 使用自己的正式測試 app／有同意的 sample，驗證 Steamworks
+   初始化、ActivateGameOverlay、可用性／啟動回呼的作用上下文。
+2. GuideDeck 獨立執行，確認無須 SDK 的原生快捷鍵在實際遊戲中的
+   行為；不冒用其他遊戲身分，不注入遊戲。
+3. 分別驗證桌面與手把版遊戲 overlay 的 D-pad／A／B／文字輸入與
+   返回；不要只測是否顯示。保留失敗與未知狀態。
+4. Steam Guide 原生響應、Game Bar 入口、overlay 介面樣式分開測。
+5. 多家 overlay、客戶端更新、不同帳號、修飾鍵按住與視窗切換測試。

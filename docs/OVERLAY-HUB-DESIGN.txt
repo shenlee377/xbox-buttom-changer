@@ -1,0 +1,197 @@
+GuideDeck 內嵌介面與手把操作中心 — 設計提案
+研究日期：2026-10-31（Asia/Taipei）
+狀態：提案／文件研究，尚未加入 0.4.1 的執行功能。
+提案以手把完成開啟、操作、關閉、返回為完整體驗；不能只驗證熱鍵有反應。
+本次沒有把文件確認的快捷鍵標成已通過實機整合。
+
+1. 產品目標
+
+玩家用手把選擇「現在要做什麼」，GuideDeck 決定已驗證的執行方式。
+每個目標分開記錄：能否呼叫、能否手把操作、能否觀察狀態、能否
+關閉／返回、能否排除 Guide／快捷鍵競爭。不能用單一「支援」勾選
+把這些能力混在一起。開啟第三方客戶端也不等於開啟遊戲內 overlay。
+
+兩層使用體驗：
+  A. 統一的手把面板：截圖、保存片段、開啟社群介面等已驗證動作。
+  B. 開啟第三方完整介面：明確標示原生手把、需滑鼠模式或僅鍵鼠。
+
+預設完整手把流程只列出已驗收的目標。未確認的第三方介面可以出現
+在進階來源清單，不能預設標成可操作。不要開完一個鍵鼠 HUD 就把
+玩家留在裡面；返回遊戲也要列為驗收條件。
+
+2. Steam API 調查結論
+
+詳見 docs/research/STEAM-API-REVIEW.txt，包含官方連結與適用上下文。
+Steamworks 確實有 ActivateGameOverlay、ShowBindingPanel、遊戲內
+鍵盤與手把轉鍵鼠 API。但這些多屬呼叫方的 Steam 應用程式上下文，
+不代表 GuideDeck 可以選任意遊戲 PID，遙控那個遊戲的 overlay。
+特別注意 ShowBindingPanel 在桌面模式可能另開 Big Picture 彈窗。
+
+獨立工具先採可驗證的原生快捷鍵與設定協助。未來遊戲／廠商合作
+插件可提供有作用範圍、具回傳值的 IPC/API，走正式合作的呼叫路徑。
+Steam 自己的 CEF/WebUI JavaScript 物件和 private IPC 不當成穩定公共
+API，也不預設開啟遠端除錯或注入 DLL。
+
+Steam「桌面大螢幕啟動器」與「遊戲中的手把版 overlay」要分成兩個
+目標。玩家可選後者，不應因此自動打開前者。Steam 原生 Guide
+自動響應和 overlay 的手把介面樣式也應分開管理。
+
+3. 來源能力與操作等級
+
+機器可讀的候選清單：docs/research/overlay-providers.research.json。
+清單是研究資料，當前 app 沒有載入它來發送按鍵或呼叫第三方。
+
+能力不互相推定：
+  Activation：NativeApi / ConfirmedHotkey / ClientUri / None / Unknown
+  Navigation：NativeGamepad / VerifiedMouseAssist / ActionOnly /
+              KeyboardMouse / Unknown
+  State：Observed / UserConfirmed / Unknown
+  Isolation：VerifiedForContext / Conflict / Unknown / Unavailable
+  Exit：NativeClose / ConfirmedShortcut / UserOnly / Unknown
+
+Steam / GOG 都有 Shift+Tab 的官方預設，EA 某些遊戲與 PlayStation
+介面同為 Shift+F1。快捷鍵相同而且同時存在於同一遊戲時，發一次
+按鍵也可能同時觸發兩家。需要核對各家的實際設定，不可只修改
+GuideDeck 記錄的字串就宣稱已替其他軟體改鍵。
+NVIDIA／AMD／Discord 等也不能從安裝或執行狀態推論為可手把操作。
+
+4. 手把不能操作的介面，要怎麼處理
+
+優先次序：
+  (1) 原生支援手把，並已驗證開啟、選擇、關閉、返回。
+  (2) 用 GuideDeck 的手把卡片執行個別動作，不必進入原始介面。
+      例如 NVIDIA 已公開的截圖／保存即時重播快捷鍵；重播須已啟用。
+      有結果 API 才顯示成功；僅發出按鍵只能顯示「已送出，待確認」。
+  (3) 僅在該軟體與遊戲組合通過輸入隔離測試後，提供可選滑鼠模式。
+  (4) 其餘標為鍵鼠需求／未知，保留手動入口，不列入全手把預設。
+
+滑鼠模式不是只把搖桿映射成滑鼠：
+- GuideDeck 接收到手把，不等於原遊戲收不到。搖桿可能同時移動
+  游標和遊戲鏡頭，A 可能同時點擊與開火。一般讀取 API 不能保證
+  消除這條通路；未驗證隔離時不啟用此模式。
+- 只有經確認的 overlay／視窗作用中才接管；焦點離開、裝置中斷、
+  暫停／恢復、權限改變都要立即停止，釋放自己送出的按鍵。
+- 不無條件把 B 當成 Escape；Escape 可能關掉 overlay，也可能打開
+  遊戲暫停選單。每個目標必須驗證返回動作。
+- UI Automation 僅對提供可用 accessibility tree／control patterns 的
+  介面採語意操作。自繪的遊戲 HUD 不能假設存在這些節點。
+- 記錄輸入模式和相容性，不錄製一般鍵盤輸入、不上傳遊戲畫面。
+
+5. 兩種 Guide 入口模式
+
+保留 Game Bar（第一階段預設）：
+  Guide → 原生 Game Bar → GuideDeck widget → 手把選動作。
+  自家 widget 遵守 D-pad／左搖桿導覽、A 選取、B 返回，焦點清楚。
+  LB/RB 是 Game Bar 在 widgets 之間切換的保留鍵，不搶作內部分類鍵。
+  一般桌面 WPF 的可點擊 UI 不能代替遊戲內 widget 的手把體驗。
+
+跨介面動作需要處理焦點交接：
+  Game Bar 還在前景時，不能假設 Shift+Tab 已送到原遊戲。先保留
+  當次目標遊戲身分，排程短效操作，等玩家離開 Game Bar、原遊戲
+  真正返回前景且按鍵釋放後再執行；逾時或換視窗就取消。
+  WidgetControl 關閉的是 widget，不能當成關閉整個 Game Bar。
+
+直接分派（第二階段實驗模式）：
+  用 GameInput RegisterSystemButtonCallback 接收 Guide down/up，需
+  核對 SDK／runtime 版本與每個裝置的實際能力。
+  GameInput 背景 Guide 事件可能被前景程式的 exclusive policy 擋住；
+  前景獨佔也只約束其他 GameInput 使用者，不涵蓋所有輸入 API。
+  不可為了取得獨佔而搶走遊戲焦點，不能宣稱背景程式能全面攔截。
+  由玩家選擇入口模式，經實機驗證排除 Windows／Steam 等已知自動
+  Guide 響應。無法接收或仍有競爭時清楚退回手動／Game Bar 入口。
+  短按／長按區分僅在本模式可靠接收按下與放開後開放；不把 Game Bar
+  被啟動當成拿到 Guide 的完整按鍵事件，也不重送 Guide 到所有程式。
+
+6. 統一動作引擎
+
+InputSource → Gesture → Context → Rule → CapabilityCheck → Adapter → Result
+
+InputSource：區分實體與可能的虛擬／重複來源；不靠 XInput 未公開
+ordinal 當成通用攔截；一次實體按下只能產生一個 GestureId。
+Context：目前使用者／session、原目標視窗及 PID + 啟動時間、已選
+遊戲身分、權限、輸入裝置、正在使用的介面。子啟動器／遊戲是多家
+同時在場的情境，不依父程序或安裝來源就推定 overlay 可用。
+Rule：指定遊戲 > 全域預設 > 詢問／保留原行為；一個輸入只選一個動作。
+CapabilityCheck：啟用與執行狀態、實際快捷鍵、相容性、競爭、操作
+能力與返回方式。未知要顯示未知。
+Adapter：正式 API 優先；其次確認過的單次快捷鍵；客戶端 URI 明確
+標為開客戶端。插件先用宣告式能力／固定動作，不接受任意 shell 指令。
+Result：Cancelled / Unsupported / InputNotObserved / Conflict /
+PermissionMismatch / SentUnverified / ConfirmedSuccess / ConfirmedFailure。
+
+執行紀律：
+- 原生快捷鍵是鍵盤輸入串流，不是對特定 PID 的可靠 RPC。
+  重核對前景與目標、修飾鍵與中立狀態，焦點改變就取消；核對與
+  送出仍有競態，不能宣稱原子化指定進程投遞。
+- SendInput 受 UIPI 限制，不自動要求管理員權限、uiAccess、繞過
+  反作弊或安全桌面。送出成功也不等於 overlay 已出現。
+- Toggle 動作沒有可觀察狀態時不盲目重試，否則可能再次關閉介面。
+- 同一 GestureId 去重；切換遊戲、來源斷線、待執行操作逾時都取消。
+- 每位登入玩家各自執行背景代理，不用 Session 0 的系統服務操控 UI。
+  Widget／代理 IPC 驗證使用者、短效請求與動作白名單；不傳任意命令。
+- 不注入／替換遊戲 DLL，不強改整體 Steam Input，不用關閉或縮小
+  Steam 視窗假裝成功攔截。第三方自身 overlay 的相容性仍需分別驗收。
+
+7. 真正有用的新 API 路徑：Game Bar 錄影
+
+目前專案固定 Microsoft.Gaming.XboxGameBar 7.2.240903001。
+官方文件說 XboxGameBarWidgetRecordingManager 從 7.3.2511061 起提供：
+StartRecordingAsync / StopRecordingAsync / RecordLastAsync，並有實際
+錄影狀態與結果資訊。2026-10-31 NuGet 索引亦列出 7.3.2607010。
+這能讓玩家直接用手把卡片保存片段，比單純叫出錄影軟體介面更實用。
+
+落地前要完成 SDK、manifest proxy declarations 與宿主版本相容性
+檢查、Windows 編譯、舊宿主 feature gating 和遊戲內實測。
+不能只更新套件版本就聲稱現有 0.4.1 已支援錄影 API。
+不自動開啟背景錄影或麥克風；緩衝未啟用時回報不可用。
+
+8. 首頁與初次設定
+
+初次設定改問兩個問題：
+  「Xbox 鈕要開啟哪個入口？」
+  「要保持全程手把操作，還是允許需鍵鼠／已驗證滑鼠模式的介面？」
+
+頁面：我的 Guide／來源管理／各遊戲規則／衝突與測試／備份還原。
+每張卡顯示呼叫能力、操作方式、目前情境可用性、返回方式、最後
+驗收環境。把「測試開啟」與「測試手把操作」做成不同測試。
+首次使用先讀取／診斷，再讓玩家套用具體變更；不知道原生設定時
+提供對應 UI 指引，不把偏好儲存誤當成第三方設定已生效。
+
+9. 開發順序與驗收門檻（非已發布承諾）
+
+0.5：來源能力目錄、手把可用性標示、規則預覽與衝突診斷；保留
+Game Bar 入口。優先做自家完整手把面板與 Game Bar 正式錄影動作。
+Steam 分別驗證遊戲 overlay 與 Big Picture 客戶端；NVIDIA 作為首個
+第三方快捷動作實驗對象，AMD／Discord 等依硬體和遊戲測試擴充。
+
+0.6：GameInput 背景 Guide 接收、單一目的地分派、取消／去重、每遊戲
+設定及來源競爭偵測。只有通過條件的環境開放直接模式。
+
+0.7：個別軟體的滑鼠／語意導覽適配器與正式合作插件。
+缺乏輸入隔離、可靠返回或 API 的項目保持停用／實驗狀態。
+
+至少驗證：USB／Bluetooth／Xbox Wireless、遊戲前景／Steam 前景／
+桌面、單按／連按／長按、重複控制器、焦點切換、不同權限、全螢幕／
+無邊框、DPI／多螢幕、Steam + 第二啟動器同時有 overlay、原生設定
+改鍵／寫回、手把按住時進出介面、按鍵與鏡頭是否漏到遊戲、能否
+不用鍵鼠返回。對含反作弊的遊戲只做正常使用測試，不以此宣稱通用相容。
+
+一手資料：
+Steam API：docs/research/STEAM-API-REVIEW.txt。
+供應商：docs/research/overlay-providers.research.json 的 sources。
+Microsoft GameInput focus policy:
+https://learn.microsoft.com/en-us/gaming/gdk/docs/reference/input/gameinput/enums/gameinputfocuspolicy?view=gdk-2604
+Microsoft system button callback:
+https://learn.microsoft.com/en-us/gaming/gdk/docs/reference/input/gameinput/interfaces/igameinput/methods/igameinput_registersystembuttoncallback?view=gdk-2604
+Game Bar widget controls / URI（控制範圍與 shell 限制）:
+https://learn.microsoft.com/en-us/xbox/game-bar/api/xgb-widgetcontrol
+Game Bar 手把導覽與保留鍵:
+https://learn.microsoft.com/en-us/xbox/game-bar/designguide/widgetui
+Game Bar 錄影 API / changelog:
+https://learn.microsoft.com/en-us/xbox/game-bar/api/xgb-widgetrecordingmanager
+https://learn.microsoft.com/en-us/xbox/game-bar/changelog
+https://api.nuget.org/v3-flatcontainer/microsoft.gaming.xboxgamebar/index.json
+SendInput 的輸入串流與權限限制:
+https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput
+UI Automation provider 的前提:
+https://learn.microsoft.com/en-us/windows/win32/winauto/uiauto-providersoverview
