@@ -25,36 +25,36 @@ internal static class UiCapture
         {
             foreach (var page in new[] {"desktop", "updates"})
             {
-            tabs.SelectedIndex = page == "desktop" ? 0 : tabs.Items.Count - 1;
-            foreach (var compact in new[] {false, true})
-            {
-                window.Width = compact ? 780 : 1140;
-                window.Height = compact ? 580 : 860;
-                foreach (var mode in new[] {ThemeMode.Light, ThemeMode.Dark})
+                tabs.SelectedIndex = page == "desktop" ? 0 : tabs.Items.Count - 1;
+                foreach (var compact in new[] {false, true})
                 {
-                    themes.SetMode(mode, persist: false);
-                    await window.Dispatcher.InvokeAsync(() => window.UpdateLayout(), DispatcherPriority.ApplicationIdle);
-                    if ((mode == ThemeMode.Dark) != (themes.Variant == ThemeVariant.Dark))
-                        throw new InvalidOperationException("Cannot capture requested theme; check runner high-contrast settings.");
-                    var content = (FrameworkElement)window.Content;
-                    int width = (int)Math.Ceiling(content.ActualWidth), height = (int)Math.Ceiling(content.ActualHeight);
-                    var visual = new DrawingVisual();
-                    using (var drawing = visual.RenderOpen())
-                        drawing.DrawRectangle(new VisualBrush(content) {Stretch = Stretch.Fill}, null, new Rect(0, 0, width, height));
-                    var bitmap = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
-                    bitmap.Render(visual);
-                    // The root is opaque. Transparent corners signal an offset/cropping regression.
-                    foreach (var corner in new[] {new Int32Rect(0, 0, 1, 1), new Int32Rect(width - 1, height - 1, 1, 1)})
+                    window.Width = compact ? 780 : 1140;
+                    window.Height = compact ? 580 : 860;
+                    foreach (var mode in new[] {ThemeMode.Light, ThemeMode.Dark})
                     {
-                        var pixel = new byte[4]; bitmap.CopyPixels(corner, pixel, 4, 0);
-                        if (pixel[3] != 255) throw new InvalidOperationException("UI capture has a transparent or cropped corner.");
+                        themes.SetMode(mode, persist: false);
+                        await window.Dispatcher.InvokeAsync(() => window.UpdateLayout(), DispatcherPriority.ApplicationIdle);
+                        if ((mode == ThemeMode.Dark) != (themes.Variant == ThemeVariant.Dark))
+                            throw new InvalidOperationException("Cannot capture requested theme; check runner high-contrast settings.");
+                        var content = (FrameworkElement)window.Content;
+                        int width = (int)Math.Ceiling(content.ActualWidth), height = (int)Math.Ceiling(content.ActualHeight);
+                        var visual = new DrawingVisual();
+                        using (var drawing = visual.RenderOpen())
+                            drawing.DrawRectangle(new VisualBrush(content) {Stretch = Stretch.Fill}, null, new Rect(0, 0, width, height));
+                        var bitmap = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
+                        bitmap.Render(visual);
+                        // The root is opaque. Transparent corners signal an offset/cropping regression.
+                        foreach (var corner in new[] {new Int32Rect(0, 0, 1, 1), new Int32Rect(width - 1, height - 1, 1, 1)})
+                        {
+                            var pixel = new byte[4]; bitmap.CopyPixels(corner, pixel, 4, 0);
+                            if (pixel[3] != 255) throw new InvalidOperationException("UI capture has a transparent or cropped corner.");
+                        }
+                        var encoder = new PngBitmapEncoder(); encoder.Frames.Add(BitmapFrame.Create(bitmap));
+                        var suffix = compact ? "-compact" : "";
+                        using var file = File.Create(Path.Combine(directory, page + "-" + mode.ToString().ToLowerInvariant() + suffix + ".png"));
+                        encoder.Save(file);
                     }
-                    var encoder = new PngBitmapEncoder(); encoder.Frames.Add(BitmapFrame.Create(bitmap));
-                    var suffix = compact ? "-compact" : "";
-                    using var file = File.Create(Path.Combine(directory, page + "-" + mode.ToString().ToLowerInvariant() + suffix + ".png"));
-                    encoder.Save(file);
                 }
-            }
             }
         }
         finally { tabs.SelectedIndex = selected; themes.SetMode(original, persist: false); }

@@ -5,7 +5,7 @@ GuideDeck 安裝、app 內更新與解除安裝
 選擇 GitHub Releases + Velopack 1.2.161，不以 GitHub Packages 發送終端使用者更新。
 Packages 適合 NuGet/npm/容器等開發套件，不能直接變成 Windows 桌面更新服務；
 部分 registry 即使讀取公開套件也需要驗證。玩家不應提供 PAT。
-公開 Releases 可匿名提供 installer、版本 feed 與更新包，不需要另租服務器。
+公開 Releases 可匿名提供 installer、版本 feed 與更新包，不需要另租伺服器。
 
 主要下載：GuideDeck-Setup.exe（目前使用者、x64、自含 .NET）。
 安裝根目錄預設 %LOCALAPPDATA%\GuideDeck.Desktop，與既有資料
