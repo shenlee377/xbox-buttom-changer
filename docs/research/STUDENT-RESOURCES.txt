@@ -22,6 +22,8 @@ Student Developer Pack 對此專案較有用的項目
 簽章是另一件事
 - SignPath Foundation 提供符合條件的開源專案免費簽章；不是 Student Pack。
   要申請、符合公開原始碼／建置、2FA 與簽章政策等要求，不能先宣稱已取得。
+  桌面與 Game Bar 產物應分開審查；Game Bar SDK 有微軟授權條款，不能
+  假設整個套件都符合開源簽章方案的元件要求。
 - Microsoft Store 的 MSIX 經認證後可由 Store 簽章、更新，適合 Game Bar
   的長期通路；帳號資格、註冊費／豁免與地區依當時官方規定確認。
 - Azure Artifact Signing 有身分、地區及付費方案限制。學生 Azure credit

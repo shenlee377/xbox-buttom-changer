@@ -12,3 +12,5 @@ artifacts/
 *.msix
 *.appx
 *.cer
+
+**/__pycache__/

@@ -1,5 +1,6 @@
+# Optional legacy ZIP installer. Recommended default: GuideDeck-Setup.exe (Windows uninstall + in-app updates).
 param(
-    [ValidatePattern('^v[0-9]+\.[0-9]+\.[0-9]+$')][string]$Version = 'v0.4.1',
+    [ValidatePattern('^v[0-9]+\.[0-9]+\.[0-9]+$')][string]$Version = 'v0.5.0',
     [string]$ArchivePath,
     [string]$ChecksumFile,
     [switch]$SkipShortcut,

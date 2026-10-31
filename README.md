@@ -70,10 +70,10 @@ Valve 的 [2025-09-09 更新](https://steamcommunity.com/games/593110/announceme
 也可下載並檢視 `Install-GuideDeck.ps1` 後執行：
 
 ```powershell
-.\Install-GuideDeck.ps1 -Version v0.4.1
+.\Install-GuideDeck.ps1 -Version v0.5.0
 ```
 
-腳本下載對應版本、核對 SHA-256、安裝到 `%LOCALAPPDATA%\Programs\GuideDeck`，並建立開始功能表捷徑，不需要管理員權限。移除腳本保留備份／觀察與 Steam 設定。這是未簽章的開發版；若政策不允許執行腳本，可使用免安裝 ZIP，腳本不修改 Windows 安全設定。
+選用腳本下載對應版本的免安裝 ZIP、核對 SHA-256、安裝到 `%LOCALAPPDATA%\Programs\GuideDeck`，並建立開始功能表捷徑，不需要管理員權限。移除腳本保留備份／觀察與 Steam 設定。這是未簽章的開發版；若政策不允許執行腳本，可使用免安裝 ZIP，腳本不修改 Windows 安全設定。
 
 [下載安裝腳本](https://github.com/shenlee377/xbox-buttom-changer/releases/download/v0.4.1/Install-GuideDeck.ps1) · [校驗檔](https://github.com/shenlee377/xbox-buttom-changer/releases/download/v0.4.1/SHA256SUMS.txt)
 

@@ -41,9 +41,9 @@ GuideDeck 資料（含備份／觀察）；需要還原 Steam 修改時請先在
 
 安裝腳本：下載並檢視 Install-GuideDeck.ps1，依自己的 PowerShell
 執行原則執行：
-  .\Install-GuideDeck.ps1 -Version v0.4.1
+  .\Install-GuideDeck.ps1 -Version v0.5.0
   # 選配：安裝後開啟
-  .\Install-GuideDeck.ps1 -Version v0.4.1 -Launch
+  .\Install-GuideDeck.ps1 -Version v0.5.0 -Launch
 
 腳本會下載指定 Release 的 ZIP 與 SHA256SUMS.txt、驗證完整性，安裝至
 %LOCALAPPDATA%\Programs\GuideDeck 並建立開始功能表捷徑。SHA-256 核對
