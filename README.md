@@ -6,7 +6,7 @@
 
 [建置狀態](https://github.com/shenlee377/xbox-buttom-changer/actions) · [下載版本](https://github.com/shenlee377/xbox-buttom-changer/releases) · [完整操作與驗收](README.txt)
 
-目前是 **0.4.1 實驗版**：針對「按 Guide 仍進 Steam 大螢幕」改用 Steam 自己的聚焦與導覽鍵組合鍵開關。舊版僅移除 SDL mapping 並不夠；此版仍沒有全系統輸入攔截驅動，效果需實機驗收。
+目前是 **0.5.0 實驗版**：預設使用安裝版，支援 app 內 GitHub Releases 更新及 Windows 設定解除安裝。針對「按 Guide 仍進 Steam 大螢幕」改用 Steam 自己的聚焦與導覽鍵組合鍵開關。舊版僅移除 SDL mapping 並不夠；此版仍沒有全系統輸入攔截驅動，效果需實機驗收。
 
 **按 Guide 仍開啟 Steam 大螢幕：先做這件事**
 
@@ -43,15 +43,21 @@ Valve 的 [2025-09-09 更新](https://steamcommunity.com/games/593110/announceme
 
 [架構與手把操作提案](docs/OVERLAY-HUB-DESIGN.txt) · [Steam API 調查](docs/research/STEAM-API-REVIEW.txt) · [第三方來源能力研究](docs/research/overlay-providers.research.json)
 
-重點是分開驗證「能呼叫、能用手把操作、能返回遊戲、能排除輸入競爭」，並優先提供可直接用手把完成的功能面板。這些是後續設計與研究，**0.4.1 尚未加入多來源分派或通用手把滑鼠模式**。
+重點是分開驗證「能呼叫、能用手把操作、能返回遊戲、能排除輸入競爭」，並優先提供可直接用手把完成的功能面板。多來源分派、OBS／音訊／Playnite 適配器與通用手把滑鼠模式仍是後續開發，**0.5.0 不聲稱已完成**。
 
 **實際介面預覽**
 
-以下圖片來自 0.4.1 已通過驗證的 Windows WPF 程式渲染，並非概念稿。
+以下圖片來自 0.5.0 已通過驗證的 Windows WPF 程式渲染，並非概念稿。
 
 | 淺色 | 深色 |
 | --- | --- |
 | ![GuideDeck 淺色介面](docs/images/desktop-light.png) | ![GuideDeck 深色介面](docs/images/desktop-dark.png) |
+
+安裝版的更新頁（同樣來自實際安裝後的程式渲染）：
+
+| 淺色 | 深色 |
+| --- | --- |
+| ![安裝版更新頁淺色](docs/images/installed-updates-light.png) | ![安裝版更新頁深色](docs/images/installed-updates-dark.png) |
 
 **取得與安裝**
 
@@ -65,7 +71,7 @@ Valve 的 [2025-09-09 更新](https://steamcommunity.com/games/593110/announceme
 
 從 [Releases](https://github.com/shenlee377/xbox-buttom-changer/releases) 下載 `GuideDeck-windows-x64.zip`，解壓縮後執行 `GuideDeck.exe`。不需要另外安裝 .NET runtime。
 
-也提供[單檔免安裝 EXE](https://github.com/shenlee377/xbox-buttom-changer/releases/download/v0.4.1/GuideDeck.exe)；[ZIP](https://github.com/shenlee377/xbox-buttom-changer/releases/download/v0.4.1/GuideDeck-windows-x64.zip) 較小。兩者都是桌面版，並非 Game Bar widget 的自動安裝程式。
+也提供[單檔免安裝 EXE](https://github.com/shenlee377/xbox-buttom-changer/releases/download/v0.5.0/GuideDeck.exe)；[ZIP](https://github.com/shenlee377/xbox-buttom-changer/releases/download/v0.5.0/GuideDeck-windows-x64.zip) 較小。兩者都是桌面版，並非 Game Bar widget 的自動安裝程式。
 
 也可下載並檢視 `Install-GuideDeck.ps1` 後執行：
 
@@ -75,7 +81,7 @@ Valve 的 [2025-09-09 更新](https://steamcommunity.com/games/593110/announceme
 
 選用腳本下載對應版本的免安裝 ZIP、核對 SHA-256、安裝到 `%LOCALAPPDATA%\Programs\GuideDeck`，並建立開始功能表捷徑，不需要管理員權限。移除腳本保留備份／觀察與 Steam 設定。這是未簽章的開發版；若政策不允許執行腳本，可使用免安裝 ZIP，腳本不修改 Windows 安全設定。
 
-[下載安裝腳本](https://github.com/shenlee377/xbox-buttom-changer/releases/download/v0.4.1/Install-GuideDeck.ps1) · [校驗檔](https://github.com/shenlee377/xbox-buttom-changer/releases/download/v0.4.1/SHA256SUMS.txt)
+[下載安裝腳本](https://github.com/shenlee377/xbox-buttom-changer/releases/download/v0.5.0/Install-GuideDeck.ps1) · [校驗檔](https://github.com/shenlee377/xbox-buttom-changer/releases/download/v0.5.0/SHA256SUMS.txt)
 
 Game Bar 需要額外的 UWP 開發套件建置與部署；桌面 ZIP 不會自動安裝 widget。開啟桌面管理器可能切出遊戲。詳細步驟見 [README.txt](README.txt)。
 
@@ -90,7 +96,7 @@ dotnet run --project tests/GuideDeck.Tests -c Release
 
 GitHub Actions 分別執行核心測試與 Windows 桌面／UWP 建置。成功建置不代表手把行為或反作弊相容性已驗證；請閱讀 [VALIDATION.txt](VALIDATION.txt)。
 
-0.4.1 的 [Windows CI 驗證](https://github.com/shenlee377/xbox-buttom-changer/actions/runs/41077862542)已通過：84 項核心測試、深淺色對比、實際 UI 渲染、系統主題即時切換，以及桌面／UWP 建置、啟動與安裝流程。實際 Steam／手把行為仍待驗收。
+0.5.0 的 [Windows CI 驗證](https://github.com/shenlee377/xbox-buttom-changer/actions/runs/41157157073)已通過：84 項核心測試、8 項發版驗證測試、深淺色對比、免安裝／安裝版實際 UI 渲染、系統主題即時切換，以及桌面／UWP 建置、啟動與安裝流程。另實際測試安裝登錄、損壞更新拒絕、0.5.0 → 本地測試產物 0.5.1 更新／重啟、更新保留資料、解除安裝清除程式／資料／暫存／捷徑／登錄及不跟隨 junction 誤刪外部檔案。實際 Steam／手把／Game Bar 擷取仍待驗收。
 
 後續發版可在 Actions 選 **Publish verified release**，填入成功的主分支建置 run ID 和新版本 tag。流程會取用該次已測試的產物、驗證校驗、上傳 EXE／ZIP／腳本並發布 prerelease；拒絕覆蓋已發布版本，不需在本機重新打包。
 

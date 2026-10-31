@@ -1,0 +1,17 @@
+GuideDeck 0.5.0 installed update verification
+2026-10-31
+Source: af300fe400bc4529ba9a59bc728154d1d4fbeba0
+CI: https://github.com/shenlee377/xbox-buttom-changer/actions/runs/41157157073
+
+84 core tests; 8 release validation tests; 16 theme contrast checks.
+Windows desktop / UWP builds; portable and installed light/dark/compact renders; live system theme; startup/single-instance.
+
+Real Setup installation -> HKCU installed-app registration version 0.5.0.
+Corrupt local update -> ChecksumFailedException; not applied.
+Valid local 0.5.1 test fixture -> downloaded, applied, restarted; version 0.5.1, pending update null.
+User data marker preserved across update.
+Uninstall -> entire install directory, updater temp directory, user data, Start menu shortcut and installed-app registration removed.
+An external junction target survived user-data cleanup.
+Future test fixture is not part of the public release.
+
+Not runtime verified: physical controllers, Steam / third-party overlay behavior, actual Game Bar recording or anti-cheat compatibility.
